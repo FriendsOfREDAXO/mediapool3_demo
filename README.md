@@ -235,8 +235,9 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 
 Ideen für eine produktionsreife Version:
 
-- [ ] Medien bearbeiten (Titel, Kategorie, Medienfelder)
-- [ ] Medien löschen (mit Verwendungsprüfung)
+- [x] Medien bearbeiten (Titel)
+- [ ] Medien bearbeiten (Kategorie, Medienfelder)
+- [x] Medien löschen
 - [ ] Server-seitige Suche und Paginierung
 - [ ] YForm-Value-Typ `mp3_media` / `mp3_medialist`
 - [ ] Rechteprüfung für Medienkategorien
