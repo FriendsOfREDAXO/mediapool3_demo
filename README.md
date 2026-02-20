@@ -225,8 +225,6 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 ## Bekannte Einschränkungen
 
 - **Demo / Proof-of-Concept** – Nicht für den Produktiveinsatz optimiert
-- **Keine Medien-Bearbeitung** – Titel, Kategorie etc. können nicht geändert werden
-- **Keine Medien-Löschung** – Aus dem Overlay heraus können keine Dateien gelöscht werden
 - **Kein Pagination** – Lädt bis zu 1000 Dateien pro Kategorie auf einmal
 - **Client-seitige Suche** – Suche und Filter nur über bereits geladene Dateien
 - **Kein YForm-Value** – Nur als HTML-Input-Widget, nicht als eigener YForm-Feldtyp
