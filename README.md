@@ -240,7 +240,7 @@ Ideen für eine produktionsreife Version:
 - [ ] Medien bearbeiten (Kategorie, Medienfelder)
 - [x] Medien löschen
 - [x] Letzte Ansicht (Grid/Liste), Sortierung und Kategorie merken
-- [ ] Server-seitige Suche und Paginierung
+- [ ] Paginierung / Lazy Loading (aktuell: bis zu 1000 Dateien pro Kategorie auf einmal) und server-seitige Suche (aktuell: client-seitig im geladenen Array)
 - [ ] YForm-Value-Typ `mp3_media` / `mp3_medialist`
 - [ ] Rechteprüfung für Medienkategorien
 - [ ] Chunked Upload für große Dateien
