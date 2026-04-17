@@ -20,7 +20,8 @@ Ein modernes Medienpool-Overlay für das REDAXO Backend, das die REST-API des [F
 - ↕️ **Sortierung** – 6 Sortieroptionen (Datum, Dateiname, Titel – jeweils auf-/absteigend)
 - 🖼️ **Grid & Listenansicht** – Umschaltbar zwischen Kachel- und Tabellenansicht
 - 📄 **Detail-Panel** – Slide-in Panel mit Vorschau, Metadaten, Verwendungsstatus
-- ☁️ **Upload** – Dateien per Drag & Drop, Button oder **Zwischenablage (Cmd+V / Ctrl+V)** hochladen, sequenzieller Upload mit Fortschrittsanzeige
+- ☁️ **Upload** – Dateien per Drag & Drop oder Upload-Button hochladen, sequenzieller Upload mit Fortschrittsanzeige
+- 📋 **Paste-Upload** – Dateien und Bilder per **Cmd+V / Ctrl+V** direkt in die aktuelle Kategorie einfügen (Screenshots, Browser-Bilder, Finder/Explorer-Dateien)
 - 📂 **Kategorie erstellen** – Inline-Erstellung neuer Medienkategorien
 - 🌐 **Alle Medien** – Kategorieübergreifende Ansicht aller Medien
 - 🍞 **Breadcrumb** – Navigation mit Pfadanzeige
