@@ -1560,6 +1560,7 @@
         var sortSelect = qs('.mp3-sort-select', overlay);
         sortSelect.addEventListener('change', function () {
             currentSort = sortSelect.value;
+            localStorage.setItem('mp3_sort', currentSort);
             refreshDisplay();
         });
 
@@ -1571,7 +1572,7 @@
             var mode = btn.getAttribute('data-view');
             if (mode === viewMode) return;
             viewMode = mode;
-            qsa('.mp3-view-btn', viewToggle).forEach(function (b) {
+            localStorage.setItem('mp3_view', viewMode);(function (b) {
                 b.classList.toggle('mp3-view-active', b.getAttribute('data-view') === mode);
             });
             refreshDisplay();
@@ -1813,8 +1814,8 @@
         catPath = [];
         lastLoadedFiles = [];
         currentFilter = 'all';
-        currentSort = 'date_desc';
-        viewMode = 'grid';
+        currentSort = localStorage.getItem('mp3_sort') || 'date_desc';
+        viewMode = localStorage.getItem('mp3_view') || 'grid';
 
         // Show/hide multi footer
         if (multiFooter) {
@@ -1828,10 +1829,10 @@
             b.classList.toggle('mp3-filter-active', b.getAttribute('data-filter') === 'all');
         });
         qsa('.mp3-view-btn', overlay).forEach(function (b) {
-            b.classList.toggle('mp3-view-active', b.getAttribute('data-view') === 'grid');
+            b.classList.toggle('mp3-view-active', b.getAttribute('data-view') === viewMode);
         });
         var sortSel = qs('.mp3-sort-select', overlay);
-        if (sortSel) sortSel.value = 'date_desc';
+        if (sortSel) sortSel.value = currentSort;
         // Reset mobile states
         if (sidebar) sidebar.classList.remove('mp3-sidebar-open');
         var bd = qs('#mp3-sidebar-backdrop');

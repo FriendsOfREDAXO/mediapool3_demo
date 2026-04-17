@@ -239,6 +239,7 @@ Ideen für eine produktionsreife Version:
 - [x] Medien bearbeiten (Titel)
 - [ ] Medien bearbeiten (Kategorie, Medienfelder)
 - [x] Medien löschen
+- [x] Letzte Ansicht (Grid/Liste) und Sortierung merken
 - [ ] Server-seitige Suche und Paginierung
 - [ ] YForm-Value-Typ `mp3_media` / `mp3_medialist`
 - [ ] Rechteprüfung für Medienkategorien
