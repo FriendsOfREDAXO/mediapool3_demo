@@ -20,7 +20,7 @@ Ein modernes Medienpool-Overlay für das REDAXO Backend, das die REST-API des [F
 - ↕️ **Sortierung** – 6 Sortieroptionen (Datum, Dateiname, Titel – jeweils auf-/absteigend)
 - 🖼️ **Grid & Listenansicht** – Umschaltbar zwischen Kachel- und Tabellenansicht
 - 📄 **Detail-Panel** – Slide-in Panel mit Vorschau, Metadaten, Verwendungsstatus
-- ☁️ **Drag & Drop Upload** – Dateien per Drag & Drop oder Button hochladen, sequenzieller Upload mit Fortschrittsanzeige
+- ☁️ **Upload** – Dateien per Drag & Drop, Button oder **Zwischenablage (Cmd+V / Ctrl+V)** hochladen, sequenzieller Upload mit Fortschrittsanzeige
 - 📂 **Kategorie erstellen** – Inline-Erstellung neuer Medienkategorien
 - 🌐 **Alle Medien** – Kategorieübergreifende Ansicht aller Medien
 - 🍞 **Breadcrumb** – Navigation mit Pfadanzeige
@@ -228,6 +228,8 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 - **Kein Pagination** – Lädt bis zu 1000 Dateien pro Kategorie auf einmal
 - **Client-seitige Suche** – Suche und Filter nur über bereits geladene Dateien
 - **Kein YForm-Value** – Nur als HTML-Input-Widget, nicht als eigener YForm-Feldtyp
+
+> **Hinweis Paste-Upload:** Der Clipboard-Upload per Cmd+V/Ctrl+V funktioniert mit Screenshots und kopierten Bildern aus dem Browser. In Chrome/Edge funktioniert auch das Kopieren von Dateien aus dem Finder/Explorer.
 
 ## Weiterentwicklung
 

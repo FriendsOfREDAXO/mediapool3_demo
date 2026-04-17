@@ -1062,6 +1062,39 @@
         uploadNext(0);
     }
 
+    // ---- Clipboard Paste Upload ----
+    function readClipboardAndUpload() {
+        if (!navigator.clipboard || !navigator.clipboard.read) return;
+        navigator.clipboard.read().then(function (items) {
+            var files = [];
+            var promises = [];
+            items.forEach(function (item) {
+                item.types.forEach(function (type) {
+                    if (type.indexOf('image/') === 0 || type === 'application/octet-stream') {
+                        promises.push(
+                            item.getType(type).then(function (blob) {
+                                var ext = type.split('/')[1] || 'bin';
+                                ext = ext.replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+                                var name = 'paste-' + Date.now() + '.' + ext;
+                                files.push(new File([blob], name, { type: type }));
+                            })
+                        );
+                    }
+                });
+            });
+            Promise.all(promises).then(function () {
+                if (!files.length) return;
+                if (gridWrap) {
+                    gridWrap.classList.add('mp3-pasteover');
+                    setTimeout(function () { gridWrap.classList.remove('mp3-pasteover'); }, 300);
+                }
+                doUpload(files);
+            });
+        }).catch(function () {
+            // Permission denied or clipboard empty – silently ignore
+        });
+    }
+
     // ---- Build Overlay DOM ----
     function build() {
         if (built) return;
@@ -1144,6 +1177,7 @@
             '</div>';
 
         overlay   = qs('#mp3-overlay');
+        overlay.setAttribute('tabindex', '-1');
         sidebar   = qs('#mp3-sidebar');
         grid      = qs('#mp3-grid');
         gridWrap  = qs('#mp3-grid-wrap');
@@ -1635,6 +1669,33 @@
                 doUpload(e.dataTransfer.files);
             }
         });
+
+        // Paste from Clipboard via Cmd+V (paste event fires when modal has focus)
+        document.addEventListener('paste', function (e) {
+            if (!overlay || !overlay.classList.contains('mp3-open')) return;
+            // Skip when actively typing in a text field
+            var active = document.activeElement;
+            if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
+
+            var cd = e.clipboardData || window.clipboardData;
+            if (!cd || !cd.items || !cd.items.length) return;
+
+            var files = [];
+            for (var i = 0; i < cd.items.length; i++) {
+                var item = cd.items[i];
+                if (item.kind === 'file') {
+                    var file = item.getAsFile();
+                    if (file) files.push(file);
+                }
+            }
+            if (!files.length) return;
+            e.preventDefault();
+            if (gridWrap) {
+                gridWrap.classList.add('mp3-pasteover');
+                setTimeout(function () { gridWrap.classList.remove('mp3-pasteover'); }, 300);
+            }
+            doUpload(files);
+        });
     }
 
     // ---- Multi-Select Helpers ----
@@ -1744,6 +1805,8 @@
         overlay.classList.add('mp3-open');
         overlay.classList.toggle('mp3-multi-mode', multiMode);
         document.body.style.overflow = 'hidden';
+        // Focus overlay so paste events (Cmd+V) are received
+        setTimeout(function () { overlay.focus(); }, 50);
         searchInput.value = '';
         currentCat = 0;
         catCache = {};

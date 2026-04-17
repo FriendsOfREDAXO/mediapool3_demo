@@ -490,6 +490,7 @@ body.rex-theme-dark {
     background: var(--mp3-overlay-bg);
     align-items: center;
     justify-content: center;
+    outline: none;
 }
 
 #mp3-overlay.mp3-open {
@@ -1053,7 +1054,8 @@ body.rex-theme-dark {
     padding: 0;
 }
 
-#mp3-overlay .mp3-grid-wrap.mp3-dragover {
+#mp3-overlay .mp3-grid-wrap.mp3-dragover,
+#mp3-overlay .mp3-grid-wrap.mp3-pasteover {
     background: var(--mp3-dragover-bg);
     outline: 2px dashed var(--mp3-selected-border);
     outline-offset: -6px;

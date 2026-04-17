@@ -1,10 +1,10 @@
 package: mediapool3_demo
-version: '1.0.0'
+version: '1.1.0'
 author: FriendsOfREDAXO
 supportpage: https://github.com/FriendsOfREDAXO
 
 page:
-    title: 'Medienpool 3.0'
+    title: 'Medienpool via API'
     icon: rex-icon fa-photo-film
     subpages:
         demo:
