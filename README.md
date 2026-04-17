@@ -229,7 +229,7 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 - **Client-seitige Suche** – Suche und Filter nur über bereits geladene Dateien
 - **Kein YForm-Value** – Nur als HTML-Input-Widget, nicht als eigener YForm-Feldtyp
 
-> **Hinweis Paste-Upload:** Der Clipboard-Upload per Cmd+V/Ctrl+V funktioniert mit Screenshots und kopierten Bildern aus dem Browser. In Chrome/Edge funktioniert auch das Kopieren von Dateien aus dem Finder/Explorer.
+> **Hinweis Paste-Upload:** Der Clipboard-Upload per Cmd+V/Ctrl+V funktioniert mit Screenshots, kopierten Bildern aus dem Browser sowie mit Dateien, die im Finder/Explorer per Cmd+C/Ctrl+C kopiert wurden.
 
 ## Weiterentwicklung
 
