@@ -243,7 +243,7 @@ Ideen für eine produktionsreife Version:
 - [ ] Paginierung / Lazy Loading (aktuell: bis zu 1000 Dateien pro Kategorie auf einmal) und server-seitige Suche (aktuell: client-seitig im geladenen Array)
 - [ ] YForm-Value-Typ `mp3_media` / `mp3_medialist`
 - [x] Rechteprüfung für Medienkategorien (übernimmt die API via REDAXO Backend-Session)
-- [ ] Chunked Upload für große Dateien
+- [ ] Chunked Upload für große Dateien (erfordert serverseitige API-Endpunkte für Init/Chunk/Finalize – aktuell nicht im API AddOn vorhanden)
 - [ ] Bildbearbeitung (Crop, Resize) im Detail-Panel
 - [ ] Keyboard-Navigation (Pfeiltasten, Enter, Space)
 
