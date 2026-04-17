@@ -1368,6 +1368,7 @@
             if (!cat) return;
             var catId = parseInt(cat.getAttribute('data-cat'), 10);
             currentCat = catId;
+            localStorage.setItem('mp3_cat', catId);
 
             // Mark active in sidebar
             qsa('.mp3-cat', sidebar).forEach(function (c) {
@@ -1392,6 +1393,7 @@
             e.preventDefault();
             var catId = parseInt(item.getAttribute('data-cat'), 10);
             currentCat = catId;
+            localStorage.setItem('mp3_cat', catId);
             buildBreadcrumb(catId);
             rerenderSidebar();
             loadFiles(catId);
@@ -1809,7 +1811,7 @@
         // Focus overlay so paste events (Cmd+V) are received
         setTimeout(function () { overlay.focus(); }, 50);
         searchInput.value = '';
-        currentCat = 0;
+        currentCat = parseInt(localStorage.getItem('mp3_cat') || '0', 10);
         catCache = {};
         catPath = [];
         lastLoadedFiles = [];
