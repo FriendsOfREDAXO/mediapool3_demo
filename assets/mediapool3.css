@@ -3711,3 +3711,145 @@ body.rex-theme-dark .mp3-cat-move-modal-select {
     opacity: .6;
     cursor: not-allowed;
 }
+
+/* ===================================================================
+   COMPACT MODE — triggered by ResizeObserver when modal < 700px wide
+   Uses position: absolute (relative to modal) instead of fixed
+   =================================================================== */
+
+/* Modal: allow absolute children to overflow cleanly */
+#mp3-overlay.mp3-compact .mp3-modal {
+    min-width: 0 !important;
+}
+
+#mp3-overlay.mp3-compact .mp3-resize-handle {
+    display: none !important;
+}
+
+#mp3-overlay.mp3-compact .mp3-header {
+    cursor: default;
+    flex-wrap: wrap;
+    padding: 8px 10px;
+    gap: 6px;
+}
+
+#mp3-overlay.mp3-compact .mp3-header-info {
+    display: none;
+}
+
+#mp3-overlay.mp3-compact .mp3-header-tools {
+    order: 10;
+    flex: 1 1 100%;
+    gap: 6px;
+}
+
+#mp3-overlay.mp3-compact .mp3-fullscreen-toggle {
+    display: none;
+}
+
+#mp3-overlay.mp3-compact .mp3-search-wrap {
+    flex: 1 1 100%;
+    order: 10;
+    max-width: none;
+}
+
+#mp3-overlay.mp3-compact .mp3-sort-select {
+    flex: 1;
+}
+
+#mp3-overlay.mp3-compact .mp3-upload-label {
+    display: none;
+}
+
+#mp3-overlay.mp3-compact .mp3-title {
+    font-size: 14px;
+}
+
+/* Sidebar as offcanvas (absolute within modal) */
+#mp3-overlay.mp3-compact .mp3-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 600;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: none;
+}
+
+#mp3-overlay.mp3-compact .mp3-sidebar.mp3-sidebar-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Backdrop (absolute within modal) */
+#mp3-overlay.mp3-compact .mp3-sidebar-backdrop {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 599;
+}
+
+#mp3-overlay.mp3-compact .mp3-sidebar-backdrop.mp3-backdrop-open {
+    display: block;
+}
+
+/* Show mobile cat button */
+#mp3-overlay.mp3-compact .mp3-mobile-cat-btn {
+    display: flex;
+}
+
+/* Detail panel as bottom sheet (absolute within modal) */
+#mp3-overlay.mp3-compact .mp3-detail {
+    position: absolute;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    max-height: 70%;
+    z-index: 600;
+    border-left: none;
+    border-top: 1px solid var(--mp3-detail-border);
+    border-radius: 12px 12px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.25s ease;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+}
+
+#mp3-overlay.mp3-compact .mp3-detail.mp3-detail-open {
+    transform: translateY(0);
+}
+
+/* Grid */
+#mp3-overlay.mp3-compact .mp3-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+    gap: 8px !important;
+}
+
+/* Filter bar */
+#mp3-overlay.mp3-compact .mp3-filter-bar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px 10px;
+}
+
+#mp3-overlay.mp3-compact .mp3-tag-filter-wrap {
+    margin-left: 0;
+    min-width: 150px;
+}
+
+/* List view: hide type and date columns */
+#mp3-overlay.mp3-compact .mp3-list-cell-type,
+#mp3-overlay.mp3-compact .mp3-list-table thead th:nth-child(3),
+#mp3-overlay.mp3-compact .mp3-list-cell-date,
+#mp3-overlay.mp3-compact .mp3-list-table thead th:nth-child(5) {
+    display: none;
+}

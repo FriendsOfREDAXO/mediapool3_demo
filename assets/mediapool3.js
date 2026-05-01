@@ -3511,7 +3511,31 @@
             var dragging = false, resizing = false;
             var startX, startY, startW, startH, startLeft, startTop;
 
-            function isMobile() { return window.innerWidth <= 768; }
+            function isMobile() { return window.innerWidth <= 768 || overlay.classList.contains('mp3-compact'); }
+
+            // Track compact mode via ResizeObserver
+            var COMPACT_BREAKPOINT = 700;
+            if (typeof ResizeObserver !== 'undefined') {
+                var compactObserver = new ResizeObserver(function (entries) {
+                    for (var i = 0; i < entries.length; i++) {
+                        var w = entries[i].contentRect.width;
+                        var isCompact = w < COMPACT_BREAKPOINT;
+                        var wasCompact = overlay.classList.contains('mp3-compact');
+                        if (isCompact !== wasCompact) {
+                            overlay.classList.toggle('mp3-compact', isCompact);
+                            // Close sidebar & detail when leaving compact mode
+                            if (!isCompact) {
+                                if (sidebar) {
+                                    sidebar.classList.remove('mp3-sidebar-open');
+                                    var bd = qs('#mp3-sidebar-backdrop');
+                                    if (bd) bd.classList.remove('mp3-backdrop-open');
+                                }
+                            }
+                        }
+                    }
+                });
+                compactObserver.observe(modal);
+            }
 
             // ---- Drag move via header ----
             header.addEventListener('mousedown', function (e) {
