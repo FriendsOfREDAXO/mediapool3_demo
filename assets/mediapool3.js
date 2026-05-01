@@ -35,7 +35,7 @@
     var mediaQuery = '';
     var mediaForceCacheTokens = {}; // filename -> token for forced cache bust after replace
     var selectedFile = null; // currently selected filename for detail view
-    var viewMode = 'grid'; // grid | list | masonry
+    var viewMode = 'grid'; // grid | list | mediawall
     var COLLECTION_TAG_PREFIX = 'collection:';
     var activeCollectionId = null;
     var darkModeEnabled = false; // true = dark mode, false = light mode
@@ -2357,8 +2357,8 @@
 
         if (viewMode === 'list') {
             renderFilesList(files);
-        } else if (viewMode === 'masonry') {
-            renderFilesMasonry(files);
+        } else if (viewMode === 'mediawall' || viewMode === 'masonry') {
+            renderFilesMediaWall(files);
         } else {
             renderFilesGrid(files);
         }
@@ -2436,7 +2436,7 @@
         grid.innerHTML = html;
     }
 
-    function renderFilesMasonry(files) {
+    function renderFilesMediaWall(files) {
         var activeCollection = getActiveCollection();
         var html = '';
         for (var i = 0; i < files.length; i++) {
@@ -2480,7 +2480,7 @@
 
             html += '</div>';
         }
-        grid.className = 'mp3-grid mp3-view-masonry';
+        grid.className = 'mp3-grid mp3-view-mediawall';
         grid.innerHTML = html;
     }
 
@@ -3106,7 +3106,7 @@
                             '<div class="mp3-view-toggle">' +
                                 '<button class="mp3-view-btn mp3-view-active" data-view="grid" title="Kacheln"><i class="fa-solid fa-table-cells"></i></button>' +
                                 '<button class="mp3-view-btn" data-view="list" title="Liste"><i class="fa-solid fa-list"></i></button>' +
-                                '<button class="mp3-view-btn" data-view="masonry" title="Masonry"><i class="fa-solid fa-table-cells-large"></i></button>' +
+                                '<button class="mp3-view-btn" data-view="mediawall" title="Media Wall"><i class="fa-solid fa-table-cells-large"></i></button>' +
                             '</div>' +
                             '<label class="mp3-upload-btn" title="Dateien hochladen">' +
                                 '<i class="fa-solid fa-cloud-arrow-up"></i>' +
@@ -4563,7 +4563,11 @@
         currentTagCatalog = [];
         currentSort = localStorage.getItem('mp3_sort') || 'date_desc';
         viewMode = localStorage.getItem('mp3_view') || 'grid';
-        if (viewMode !== 'grid' && viewMode !== 'list' && viewMode !== 'masonry') {
+        // Backward-compat: old value "masonry" now maps to "mediawall"
+        if (viewMode === 'masonry') {
+            viewMode = 'mediawall';
+        }
+        if (viewMode !== 'grid' && viewMode !== 'list' && viewMode !== 'mediawall') {
             viewMode = 'grid';
         }
         setActiveCollection(localStorage.getItem('mp3_active_collection') || null);
