@@ -1654,12 +1654,11 @@
         if (!editorCanvasOpen) return;
         var val = '';
         if (typeof tinymce !== 'undefined' && editorCanvasTinyId && tinymce.get(editorCanvasTinyId)) {
-            val = tinymce.get(editorCanvasTinyId).getContent({ format: 'text' });
+            val = tinymce.get(editorCanvasTinyId).getContent();
         } else {
             var ta = qs('#mp3-editor-canvas-textarea', overlay);
             if (ta) val = ta.value;
         }
-        val = richTextToPlainText(val);
 
         // Write back to hidden input in detail panel
         if (detailPanel && editorCanvasFieldKey !== null) {
