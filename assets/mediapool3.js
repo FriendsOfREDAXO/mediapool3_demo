@@ -3468,18 +3468,27 @@
             if (!collectionId) return;
 
             var dt = e.dataTransfer;
-            var filename = '';
+            var filenames = [];
             if (dt) {
-                filename = String(dt.getData('text/mp3-filename') || dt.getData('text/plain') || '').trim();
+                var multi = String(dt.getData('text/mp3-filenames') || '').trim();
+                if (multi) {
+                    filenames = multi.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+                } else {
+                    var single = String(dt.getData('text/mp3-filename') || dt.getData('text/plain') || '').trim();
+                    if (single) filenames = [single];
+                }
             }
-            if (!filename) return;
+            if (!filenames.length) return;
 
-            setFileCollectionMembership(filename, collectionId, true)
+            var promises = filenames.map(function (fn) {
+                return setFileCollectionMembership(fn, collectionId, true);
+            });
+            Promise.all(promises)
                 .then(function () {
                     setActiveCollection(collectionId);
                     rerenderSidebar();
                     refreshDisplay();
-                    if (selectedFile === filename) showDetail(filename);
+                    if (selectedFile && filenames.indexOf(selectedFile) !== -1) showDetail(selectedFile);
                 })
                 .catch(function (err) {
                     alert('Fehler beim Zuordnen zur Sammlung: ' + err.message);
@@ -3560,6 +3569,11 @@
             if (!item) return;
             var filename = String(item.getAttribute('data-filename') || '');
             if (!filename || !e.dataTransfer) return;
+            // If multi-selected and dragged card is part of selection → carry all selected
+            var dragFiles = (multiMode && Object.keys(multiSelected).length > 0 && multiSelected[filename])
+                ? Object.keys(multiSelected)
+                : [filename];
+            e.dataTransfer.setData('text/mp3-filenames', dragFiles.join(','));
             e.dataTransfer.setData('text/mp3-filename', filename);
             e.dataTransfer.setData('text/plain', filename);
             e.dataTransfer.effectAllowed = 'copy';
@@ -3576,6 +3590,14 @@
             } else {
                 ghost.style.fontSize = '24px';
                 ghost.textContent = '\uD83D\uDCC4';
+            }
+            // Badge for multi-file drag
+            if (dragFiles.length > 1) {
+                var badge = document.createElement('div');
+                badge.textContent = dragFiles.length;
+                badge.style.cssText = 'position:absolute;bottom:2px;right:2px;background:#e44;color:#fff;font-size:11px;font-weight:700;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;line-height:1;';
+                ghost.style.position = 'relative';
+                ghost.appendChild(badge);
             }
             document.body.appendChild(ghost);
             e.dataTransfer.setDragImage(ghost, 32, 32);
