@@ -3511,7 +3511,7 @@
             var dragging = false, resizing = false;
             var startX, startY, startW, startH, startLeft, startTop;
 
-            function isMobile() { return window.innerWidth <= 768 || overlay.classList.contains('mp3-compact'); }
+            function isMobile() { return window.innerWidth <= 768; }
 
             // Track compact mode via ResizeObserver
             var COMPACT_BREAKPOINT = 760;

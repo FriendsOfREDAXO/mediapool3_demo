@@ -3722,10 +3722,6 @@ body.rex-theme-dark .mp3-cat-move-modal-select {
     min-width: 0 !important;
 }
 
-#mp3-overlay.mp3-compact .mp3-resize-handle {
-    display: none !important;
-}
-
 #mp3-overlay.mp3-compact .mp3-header {
     cursor: default;
     flex-wrap: wrap;
