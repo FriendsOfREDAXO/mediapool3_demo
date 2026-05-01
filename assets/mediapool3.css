@@ -1801,7 +1801,7 @@ body.rex-theme-dark {
 
 #mp3-overlay .mp3-lightbox-open-btn {
     position: absolute;
-    right: 8px;
+    left: 8px;
     top: 8px;
     z-index: 2;
     width: 32px;
