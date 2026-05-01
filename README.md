@@ -15,14 +15,21 @@ Es besteht aus zwei Teilen:
 
 ### Medienpool-Overlay
 - 📁 **Kategorie-Baum** – Aufklappbare Sidebar mit allen Medienkategorien
-- 🔍 **Suche** – Serverseitige Suche über Titel, Dateiname, Originalname und JSON-Metadaten
+- � **Kategoriesuche** – Filterfeld in der Sidebar zur schnellen Kategorie-Suche
+- 📦 **Kategorie verschieben** – Kategorie per Modal in eine andere Elternkategorie verschieben (mit Zyklenschutz)
+- �🔍 **Suche** – Serverseitige Suche über Titel, Dateiname, Originalname und JSON-Metadaten
 - 🏷️ **Typ-Filter** – Filter-Pills für Bilder, Videos, Audio, Dokumente, Sonstige (mit Anzahl-Badges)
 - 🏷️ **Tag-Filter** – Mehrfachauswahl aus vorhandenen Tags (Collection-Tags werden ausgeblendet)
 - ↕️ **Sortierung** – 6 Sortieroptionen (Datum, Dateiname, Titel – jeweils auf-/absteigend)
 - 📄 **Pagination** – konfigurierbare Seitengröße inkl. „Mehr laden“
 - 🖼️ **Grid, Liste & Masonry** – Umschaltbar zwischen Kachel-, Tabellen- und Masonry-Ansicht
 - 📄 **Detail-Panel** – Vorschau, editierbarer Titel, JSON-Metadaten, Legacy-Metadaten (einblendbar), Verwendungsstatus, Sammlungs-Info (read-only)
-- 🔁 **Medien tauschen** – Dateiinhalt ersetzen bei gleichem Dateinamen und kompatibler Dateiendung
+- � **Datei-Kategorie wechseln** – Kategorie einer Datei direkt im Detailpanel per Dropdown ändern
+- 🌐 **Sprachlabels** – Mehrsprachige Eingabefelder zeigen das Sprachkürzel als angekoppeltes Label rechts am Input
+- 🖼️ **ALT-Text dekorativ** – Wird eine Datei als dekoratives Bild markiert, blendet das Detailpanel die ALT-Text-Felder aus
+- ✍️ **TinyMCE-Teaser** – Richtext-Felder zeigen eine normalisierte Klartext-Vorschau (ohne HTML-Tags / `&nbsp;`) im Detailpanel; gespeichert wird stets der vollständige HTML-Inhalt
+- 🏷️ **System-Tags Autocomplete** – Bereits dem Medium zugewiesene Tags werden aus der Vorschlagsliste ausgeblendet
+- �🔁 **Medien tauschen** – Dateiinhalt ersetzen bei gleichem Dateinamen und kompatibler Dateiendung
 - ⬇️ **Download** – Datei direkt aus dem Detailpanel herunterladen
 - 🗑️ **Löschen** – Datei löschen (inkl. In-Use-Schutz)
 - ☁️ **Upload** – Dateien per Drag & Drop oder Upload-Button hochladen, sequenzieller Upload mit Fortschrittsanzeige
@@ -30,7 +37,7 @@ Es besteht aus zwei Teilen:
 - 📂 **Kategorie erstellen/umbenennen** – Kategorieverwaltung direkt in der Sidebar
 - 🌐 **Alle Medien** – Kategorieübergreifende Ansicht aller Medien
 - 🍞 **Breadcrumb** – Navigation mit Pfadanzeige
-- 📱 **Mobile-optimiert** – Offcanvas-Sidebar, Bottom-Sheet Detail-Panel
+- 📱 **Responsive Compact-Mode** – Bei kleinen Modal-Breiten (< 760 px) schaltet ein ResizeObserver automatisch auf ein mobil-optimiertes Layout um: Offcanvas-Sidebar, Bottom-Sheet Detail-Panel
 - 🌙 **Dark Mode Toggle** – Umschaltbar im Overlay, unabhängig vom REDAXO-Theme (Persistenz via localStorage)
 - 🧭 **Stabiler Scroll-Start** – Beim Öffnen bleibt die aktuelle Backend-Scrollposition erhalten (kein Sprung nach oben)
 
@@ -210,10 +217,12 @@ mediapool3_demo/
 ├── install.php                  # Installations-Logik
 ├── uninstall.php                # Deinstallations-Logik
 ├── assets/
-│   ├── mediapool3.js            # Overlay-Picker (~1200 Zeilen IIFE)
-│   ├── mediapool3.css           # Overlay-Styles (~1750 Zeilen, inkl. Dark Mode)
+│   ├── mediapool3.js            # Overlay-Picker (IIFE)
+│   ├── mediapool3.css           # Overlay-Styles (inkl. Dark Mode + Compact-Mode)
 │   ├── mediapool3_widget.js     # Input-Widget Auto-Init
 │   └── mediapool3_widget.css    # Widget-Styles (inkl. Dark Mode)
+├── lib/
+│   └── rex_api_mediapool3_demo_categories.php  # API-Endpunkt (GET + PATCH) für Kategorie-Verwaltung
 └── pages/
     ├── index.php                # Subpage-Router
     ├── demo.php                 # Demo-Seite mit Beispielen
@@ -262,6 +271,8 @@ Der Picker nutzt aktuell folgende Endpunkte.
 | PATCH | `index.php?rex-api-call=mediapool3_demo_json_metainfo&filename={filename}` | JSON-Metadaten + System-Tags eines Mediums speichern |
 | GET | `index.php?rex-api-call=mediapool3_demo_tags[&filenames=a,b,c]` | Tag-Katalog und Datei-Tag-Zuordnungen laden |
 | PATCH | `index.php?rex-api-call=mediapool3_demo_tags` | Sammlung anlegen/umbenennen/löschen (`action=collection_*`) |
+| GET | `index.php?rex-api-call=mediapool3_demo_categories` | Flache Kategorie-Liste mit Tiefe und Parent-ID laden |
+| PATCH | `index.php?rex-api-call=mediapool3_demo_categories` | `parent_id` einer Kategorie setzen (Verschieben, mit Zyklenschutz) |
 
 ### Wie Metadaten gespeichert werden
 
@@ -316,7 +327,7 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 Ideen für eine produktionsreife Version:
 
 - [x] Medien bearbeiten (Titel)
-- [ ] Medien bearbeiten (Kategorie)
+- [x] Medien bearbeiten (Kategorie)
 - [x] Medien bearbeiten (Titel, JSON-Metadaten)
 - [x] Medien löschen
 - [x] Letzte Ansicht (Grid/Liste), Sortierung und Kategorie merken
