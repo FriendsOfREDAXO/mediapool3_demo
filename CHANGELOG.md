@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 1.3.0 – 2026-05-01
+
+### Neu
+- Mehrfachzuordnung zu Sammlungen im **Normalmodus**: Markieren mit Cmd/Ctrl+Klick und gemeinsames Drag-and-Drop auf Sammlung
+- Upload im Sammlungsmodus mit Kategorieauswahl-Dialog und automatischer Übernahme in die aktive Sammlung
+- Kompaktes Drag-Preview (inkl. Badge bei Mehrfach-Drag) für bessere Treffsicherheit auf Sammlungen
+
+### Geändert
+- Demo-Seite verwendet keine hardcodierten Testdateien mehr, sondern belegt Beispiele dynamisch mit vorhandenen Medien aus der Datenbank
+- README erweitert: klare Trennung zwischen Picker-Multi-Select und Sammlungs-Batch-Drag, plus aktualisierte Feature-Beschreibung
+
+### Fixes
+- ParseError in `pages/demo.php` behoben
+- Upload-404 im Sammlungsmodus behoben (interner Moduswert `-1` wird nicht mehr als Kategorie gesendet)
+- Scroll-Sprung beim Öffnen des Overlays im be_style-Backend verhindert
+
 ## Version 1.2.0 – 2026-05-01
 
 ### Neu

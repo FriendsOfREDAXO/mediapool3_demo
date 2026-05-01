@@ -32,19 +32,28 @@ Es besteht aus zwei Teilen:
 - 🍞 **Breadcrumb** – Navigation mit Pfadanzeige
 - 📱 **Mobile-optimiert** – Offcanvas-Sidebar, Bottom-Sheet Detail-Panel
 - 🌙 **Dark Mode Toggle** – Umschaltbar im Overlay, unabhängig vom REDAXO-Theme (Persistenz via localStorage)
+- 🧭 **Stabiler Scroll-Start** – Beim Öffnen bleibt die aktuelle Backend-Scrollposition erhalten (kein Sprung nach oben)
 
 ### Sammlungen (Collections)
 - 📚 **Sammlungskatalog** – Sammlungen anlegen, umbenennen und löschen
 - 🎯 **Modus-Trennung** – Entweder Kategorie-Modus oder Sammlungs-Modus aktiv
 - 🔖 **Zuordnung pro Medium** – In Grid/Liste/Masonry per Lesezeichen-Button zur aktiven Sammlung
 - 🧲 **Drag-and-Drop** – Medien auf Sammlung in der Sidebar ziehen, um sie zuzuordnen
+- 🎯 **Batch-Drag im Normalmodus** – Mehrere Medien mit **Cmd/Ctrl + Klick** markieren und gemeinsam auf eine Sammlung ziehen
+- 🪶 **Kompaktes Drag-Preview** – Beim Ziehen wird ein kleines Drag-Bild verwendet (Trefffläche der Sammlung bleibt gut nutzbar)
 - 🧾 **Detailanzeige** – Im Detailpanel wird nur angezeigt, in welchen Sammlungen das Medium liegt
+- ⬆️ **Upload im Sammlungsmodus** – Vor dem Upload wird eine Zielkategorie abgefragt; erfolgreiche Uploads werden automatisch der aktiven Sammlung zugeordnet
 
-### Multi-Select
+### Multi-Select (nur Picker-Modus)
 - ☑️ **Mehrfachauswahl** – Dateien per Klick an-/abwählen (Checkbox auf jeder Karte)
 - ✅ **Alle auswählen / abwählen** – Toggle-Button in der Footer-Leiste
 - 📊 **Zähler** – Anzeige der Anzahl ausgewählter Dateien
 - 📤 **Übernehmen** – Bestätigungs-Button gibt Array aller gewählten Dateinamen zurück
+
+### Mehrfachzuordnung zu Sammlungen (Normalmodus)
+- 🖱️ **Markieren per Cmd/Ctrl + Klick** – Ohne Picker-Multi-Select mehrere Medien zur Sammelzuordnung markieren
+- 🧲 **Gemeinsamer Drop** – Ein markiertes Medium auf die Zielsammlung ziehen, alle markierten Medien werden zugeordnet
+- 🧹 **Auto-Clear nach Erfolg** – Die Markierung wird nach erfolgreicher Zuordnung zurückgesetzt
 
 ### Input-Widget
 - 🖼️ **Vorschau** – Thumbnails für Bilder, Icons für andere Dateitypen
@@ -84,6 +93,20 @@ Im REDAXO Backend unter **API → Konfiguration** müssen folgende Backend-Endpu
 4. Im Menü erscheint **Medienpool 3.0** mit den Seiten **Demo** und **Debug**
 
 ## Verwendung
+
+### Mehrfachauswahl erklärt
+
+Es gibt zwei unterschiedliche Mehrfach-Mechaniken:
+
+1. **Picker-Multi-Select** (`MP3.open(..., { multiple: true })`)
+    - Zweck: Dateinamen als Array an einen Callback zurückgeben (z.B. Modul, YForm, Widget)
+    - UI: Checkboxen, Footer mit „Alle auswählen“ und „Übernehmen“
+
+2. **Sammlungs-Batch-Drag im Normalmodus** (`MP3.open()` oder Backend-Standardansicht)
+    - Zweck: Mehrere vorhandene Medien gleichzeitig einer Sammlung zuordnen
+    - Bedienung: Mit **Cmd/Ctrl + Klick** markieren, dann ein markiertes Medium auf eine Sammlung ziehen
+
+Die beiden Modi sind bewusst getrennt: Der Picker-Multi-Select ist für Rückgabe/Selektion, der Batch-Drag im Normalmodus für schnelle Verwaltung von Sammlungen.
 
 ### JavaScript API
 
@@ -297,7 +320,8 @@ Ideen für eine produktionsreife Version:
 - [x] Medien bearbeiten (Titel, JSON-Metadaten)
 - [x] Medien löschen
 - [x] Letzte Ansicht (Grid/Liste), Sortierung und Kategorie merken
-- [ ] Paginierung / Lazy Loading (aktuell: bis zu 1000 Dateien pro Kategorie auf einmal) und server-seitige Suche (aktuell: client-seitig im geladenen Array)
+- [x] Paginierung / Lazy Loading
+- [x] Server-seitige Suche
 - [ ] YForm-Value-Typ `mp3_media` / `mp3_medialist`
 - [x] Rechteprüfung für Medienkategorien (übernimmt die API via REDAXO Backend-Session)
 - [ ] Chunked Upload für große Dateien (erfordert serverseitige API-Endpunkte für Init/Chunk/Finalize – aktuell nicht im API AddOn vorhanden)
