@@ -1775,6 +1775,52 @@
         listWrap.innerHTML = html;
     }
 
+    function collectTagNames(values) {
+        var names = [];
+        var seen = Object.create(null);
+        if (!Array.isArray(values)) return names;
+        for (var i = 0; i < values.length; i++) {
+            var item = values[i];
+            var name = typeof item === 'string' ? item : String((item && item.name) || '');
+            name = String(name || '').trim();
+            if (!name || seen[name]) continue;
+            seen[name] = true;
+            names.push(name);
+        }
+        return names;
+    }
+
+    function renderSystemTagSuggestionOptions(catalog, selectedNames) {
+        var selected = Object.create(null);
+        for (var i = 0; i < selectedNames.length; i++) {
+            selected[selectedNames[i]] = true;
+        }
+
+        var html = '';
+        for (var j = 0; j < (catalog || []).length; j++) {
+            var item = catalog[j];
+            var name = item && item.name ? String(item.name).trim() : '';
+            if (!name) continue;
+            if (isCollectionTagName(name)) continue;
+            if (selected[name]) continue;
+            html += '<option value="' + escAttr(name) + '"></option>';
+        }
+        return html;
+    }
+
+    function repaintSystemTagSuggestions() {
+        if (!detailPanel) return;
+        var datalist = detailPanel.querySelector('#mp3-system-tags-suggestions');
+        var hidden = detailPanel.querySelector('.mp3-json-field[data-field-key="__system_tags"] [data-widget="tags-value"]');
+        if (!datalist || !hidden) return;
+
+        var values = [];
+        try { values = JSON.parse(hidden.value || '[]'); } catch (e) { values = []; }
+        if (!Array.isArray(values)) values = [];
+
+        datalist.innerHTML = renderSystemTagSuggestionOptions(detailSystemTagCatalog || [], collectTagNames(values));
+    }
+
     function applyTagColorChange(colorInput) {
         if (!colorInput) return;
         var colorWrap = colorInput.closest('.mp3-tags-widget');
@@ -1805,13 +1851,7 @@
         html += '<label class="mp3-edit-label">System-Tags <span class="mp3-edit-kind-badge">global</span></label>';
         html += renderTagsWidget(field, split.normal);
         html += '<datalist id="mp3-system-tags-suggestions">';
-        for (var i = 0; i < (catalog || []).length; i++) {
-            var item = catalog[i];
-            var name = item && item.name ? String(item.name) : '';
-            if (isCollectionTagName(name)) continue;
-            if (!name) continue;
-            html += '<option value="' + escAttr(name) + '"></option>';
-        }
+        html += renderSystemTagSuggestionOptions(catalog || [], collectTagNames(split.normal));
         html += '</datalist>';
         html += '<div class="mp3-metainfo-hint">Autofill aus bestehenden Tags. Farben gelten systemweit.</div>';
         html += '<button type="button" class="mp3-field-save-btn" data-save-field="__system_tags" style="display:none"><i class="fa-solid fa-floppy-disk"></i> Speichern</button>';
@@ -4335,6 +4375,9 @@
                 hiddenInput.value = JSON.stringify(list);
                 tagsInput.value = '';
                 repaintTagsWidget(wrap);
+                if (wrap.closest('.mp3-json-field[data-field-key="__system_tags"]')) {
+                    repaintSystemTagSuggestions();
+                }
                 updateDetailSaveState();
                 return;
             }
@@ -4354,6 +4397,9 @@
                 });
                 removeHidden.value = JSON.stringify(values);
                 repaintTagsWidget(removeWrap);
+                if (removeWrap.closest('.mp3-json-field[data-field-key="__system_tags"]')) {
+                    repaintSystemTagSuggestions();
+                }
                 updateDetailSaveState();
                 return;
             }
