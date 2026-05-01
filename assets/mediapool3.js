@@ -1688,6 +1688,9 @@
         } else if (!needsHint && hint) {
             hint.remove();
         }
+        // Show/hide lang inputs depending on decorative state
+        var langWrap = wrap.querySelector('.mp3-lang-inputs');
+        if (langWrap) langWrap.style.display = isDecorative ? 'none' : '';
     }
 
     function renderTagsWidget(field, value) {
@@ -1919,7 +1922,9 @@
             if (altMissing) {
                 html += '<div class="mp3-alt-hint"><i class="fa-solid fa-triangle-exclamation"></i> ALT-Text fehlt – bitte ausfüllen oder als dekorativ markieren.</div>';
             }
+            html += '<div class="mp3-lang-inputs"' + (decorative ? ' style="display:none"' : '') + '>';
             html += renderLangInputs(field, altText, false);
+            html += '</div>';
             html += '<label class="mp3-edit-checkbox-label"><input type="checkbox" data-json-field="' + escAttr(field.key) + '-decorative"' + (decorative ? ' checked' : '') + '> Dekoratives Bild (kein ALT)</label>';
             html += '</div>';
         } else if (widget === 'tags') {
