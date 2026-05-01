@@ -48,6 +48,8 @@
     var editorCanvasTinyId = null;  // TinyMCE editor id in canvas
     var editorCanvasFieldKey = null; // field key being edited
     var editorCanvasClangId = null;  // clang id (null = no translation)
+    var pageScrollTopBeforeOpen = 0;
+    var pageMainScrollTopBeforeOpen = 0;
 
     // ---- Helpers ----
     function qs(sel, ctx) {
@@ -56,6 +58,39 @@
 
     function qsa(sel, ctx) {
         return Array.prototype.slice.call((ctx || document).querySelectorAll(sel));
+    }
+
+    function focusWithoutScroll(el) {
+        if (!el || typeof el.focus !== 'function') return;
+
+        var doc = document.scrollingElement || document.documentElement;
+        var beforeTop = doc ? doc.scrollTop : 0;
+        var pageMain = qs('.rex-page-main');
+        var beforeMainTop = pageMain ? pageMain.scrollTop : 0;
+
+        try {
+            el.focus({ preventScroll: true });
+        } catch (e) {
+            el.focus();
+        }
+
+        if (doc && doc.scrollTop !== beforeTop) {
+            doc.scrollTop = beforeTop;
+        }
+        if (pageMain && pageMain.scrollTop !== beforeMainTop) {
+            pageMain.scrollTop = beforeMainTop;
+        }
+    }
+
+    function restoreBackendScrollPosition() {
+        var doc = document.scrollingElement || document.documentElement;
+        if (doc) {
+            doc.scrollTop = pageScrollTopBeforeOpen;
+        }
+        var pageMain = qs('.rex-page-main');
+        if (pageMain) {
+            pageMain.scrollTop = pageMainScrollTopBeforeOpen;
+        }
     }
 
     function formatBytes(b) {
@@ -4500,9 +4535,18 @@
 
         overlay.classList.add('mp3-open');
         overlay.classList.toggle('mp3-multi-mode', multiMode);
+        var doc = document.scrollingElement || document.documentElement;
+        pageScrollTopBeforeOpen = doc ? doc.scrollTop : 0;
+        var pageMain = qs('.rex-page-main');
+        pageMainScrollTopBeforeOpen = pageMain ? pageMain.scrollTop : 0;
         document.body.style.overflow = 'hidden';
-        // Focus overlay so paste events (Cmd+V) are received
-        setTimeout(function () { overlay.focus(); }, 50);
+        // Keep page position stable in be_style backend layouts.
+        restoreBackendScrollPosition();
+        // Focus overlay so paste events (Cmd+V) are received without triggering scroll jumps.
+        setTimeout(function () {
+            focusWithoutScroll(overlay);
+            restoreBackendScrollPosition();
+        }, 50);
         searchInput.value = '';
         currentCat = parseInt(localStorage.getItem('mp3_cat') || '0', 10);
         catCache = {};
