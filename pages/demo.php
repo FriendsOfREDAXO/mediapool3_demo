@@ -54,7 +54,7 @@ $content2 = '
 <div class="form-group">
     <label>Einzelmedium (mit erstem vorhandenen Medium vorbelegt)</label>
     <input class="mp3-widget form-control" name="demo_doc" value="' . rex_escape($demoFile1) . '">
-</div>';
+</div>
 
 <h4 style="margin-top:25px;">Verwendung</h4>
 <pre style="font-size:12px;background:#f5f5f5;padding:12px;border-radius:4px;"><code>&lt;!-- Einfach die CSS-Klasse mp3-widget setzen --&gt;

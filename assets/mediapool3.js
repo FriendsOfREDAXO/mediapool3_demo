@@ -18,6 +18,7 @@
     var onMultiSelect = null;  // callback for multi-select mode: receives array of filenames
     var multiMode = false;     // true when opened with multiple: true
     var multiSelected = {};    // filename → true (selected files in multi mode)
+    var collectionDragSelected = {}; // filename -> true (normal mode batch selection for drag to collection)
     var built = false;
     var catCache = {};     // id → { name, hasChildren, parent_id, children: [...], loaded: bool }
     var catPath = [];      // breadcrumb path: [{ id, name }, ...]
@@ -714,6 +715,9 @@
             });
         }
         renderFiles(filtered);
+        if (!multiMode) {
+            updateCollectionDragSelectionUI();
+        }
         updateFilterCounts();
         updatePaginationUi(filtered.length);
     }
@@ -3560,6 +3564,9 @@
             });
             Promise.all(promises)
                 .then(function () {
+                    if (!multiMode) {
+                        clearCollectionDragSelection();
+                    }
                     setActiveCollection(collectionId);
                     rerenderSidebar();
                     refreshDisplay();
@@ -3636,6 +3643,12 @@
                 return;
             }
 
+            // Normal mode: Cmd/Ctrl+click toggles batch selection for collection drag
+            if (e.metaKey || e.ctrlKey) {
+                toggleCollectionDragSelection(filename);
+                return;
+            }
+
             showDetail(filename);
         });
 
@@ -3644,9 +3657,10 @@
             if (!item) return;
             var filename = String(item.getAttribute('data-filename') || '');
             if (!filename || !e.dataTransfer) return;
-            // If multi-selected and dragged card is part of selection → carry all selected
-            var dragFiles = (multiMode && Object.keys(multiSelected).length > 0 && multiSelected[filename])
-                ? Object.keys(multiSelected)
+            // Carry selected files if dragged card is part of selection.
+            var selectedMap = multiMode ? multiSelected : collectionDragSelected;
+            var dragFiles = (Object.keys(selectedMap).length > 0 && selectedMap[filename])
+                ? Object.keys(selectedMap)
                 : [filename];
             e.dataTransfer.setData('text/mp3-filenames', dragFiles.join(','));
             e.dataTransfer.setData('text/mp3-filename', filename);
@@ -3757,9 +3771,11 @@
                     .then(function () {
                         lastLoadedFiles = lastLoadedFiles.filter(function (f) { return f.filename !== delFilename; });
                         delete multiSelected[delFilename];
+                        delete collectionDragSelected[delFilename];
                         hideDetail();
                         refreshDisplay();
                         if (multiMode) updateMultiUI();
+                        else updateCollectionDragSelectionUI();
                     })
                     .catch(function (err) {
                         alert('Fehler beim Löschen: ' + err.message);
@@ -4340,6 +4356,38 @@
         return filenames;
     }
 
+    function updateCollectionDragSelectionUI() {
+        qsa('.mp3-card', grid).forEach(function (c) {
+            var fn = c.getAttribute('data-filename');
+            c.classList.toggle('mp3-card-multi-selected', !!collectionDragSelected[fn]);
+        });
+
+        qsa('.mp3-list-row', grid).forEach(function (r) {
+            var fn = r.getAttribute('data-filename');
+            r.classList.toggle('mp3-list-row-multi-selected', !!collectionDragSelected[fn]);
+        });
+
+        qsa('.mp3-masonry-card', grid).forEach(function (m) {
+            var fn = m.getAttribute('data-filename');
+            m.classList.toggle('mp3-masonry-card-multi', !!collectionDragSelected[fn]);
+        });
+    }
+
+    function toggleCollectionDragSelection(filename) {
+        if (!filename) return;
+        if (collectionDragSelected[filename]) {
+            delete collectionDragSelected[filename];
+        } else {
+            collectionDragSelected[filename] = true;
+        }
+        updateCollectionDragSelectionUI();
+    }
+
+    function clearCollectionDragSelection() {
+        collectionDragSelected = {};
+        updateCollectionDragSelectionUI();
+    }
+
     function toggleSelectAll() {
         var visible = getVisibleFilenames();
         // If all visible are selected → deselect all, otherwise select all
@@ -4429,6 +4477,7 @@
 
         multiMode = !!options.multiple;
         multiSelected = {};
+        collectionDragSelected = {};
         mediaLinkPickFieldKey = null;
         closeLightbox();
         setFullscreenMode(false);
@@ -4518,6 +4567,7 @@
         }
         multiMode = false;
         multiSelected = {};
+        collectionDragSelected = {};
         mediaLinkPickFieldKey = null;
         destroyDetailTinyEditors();
         onSelect = null;
