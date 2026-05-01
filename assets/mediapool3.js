@@ -2375,6 +2375,22 @@
         return '<div class="mp3-icon"><i class="' + fileIcon(file.filename) + '"></i></div>';
     }
 
+    function renderFileTagDots(file) {
+        var tags = normalizeSystemTags(file && file.system_tags ? file.system_tags : []);
+        if (!tags.length) return '';
+
+        var html = '<div class="mp3-file-tag-dots">';
+        for (var i = 0; i < tags.length; i++) {
+            var tag = tags[i] || {};
+            var tagName = String(tag.name || '').trim();
+            if (!tagName) continue;
+            var color = /^#[0-9a-fA-F]{6}$/.test(String(tag.color || '')) ? String(tag.color).toLowerCase() : '#4a90d9';
+            html += '<span class="mp3-file-tag-dot" style="background:' + escAttr(color) + '" title="' + escAttr(tagName) + '"></span>';
+        }
+        html += '</div>';
+        return html;
+    }
+
     function renderFiles(files) {
         if (!files || !files.length) {
             grid.innerHTML = '<div style="padding:40px;text-align:center;color:#6c757d;">' +
@@ -2410,6 +2426,7 @@
                     '<span class="mp3-card-name" title="' + escAttr(f.filename) + '">' + escAttr(displayName) + '</span>' +
                     (f.title ? '<span class="mp3-fname" title="' + escAttr(f.filename) + '">' + escAttr(f.filename) + '</span>' : '') +
                     '<span class="mp3-fmeta">' + formatBytes(f.filesize) + '</span>' +
+                    renderFileTagDots(f) +
                 '</div>' +
             '</div>';
         }
@@ -2448,7 +2465,7 @@
             html += '</td>';
             var listLabel = f.title ? escAttr(f.title) : escAttr(f.filename);
             var listTooltip = f.title ? escAttr(f.filename) : '';
-            html += '<td class="mp3-list-cell-name"' + (listTooltip ? ' title="' + listTooltip + '"' : '') + '>' + listLabel + '</td>';
+            html += '<td class="mp3-list-cell-name"' + (listTooltip ? ' title="' + listTooltip + '"' : '') + '><div class="mp3-list-name-wrap"><span>' + listLabel + '</span>' + renderFileTagDots(f) + '</div></td>';
             if (activeCollection) {
                 var rowInCollection = isFileInActiveCollection(f.filename);
                 html += '<td class="mp3-list-cell-collection">' +
@@ -2504,6 +2521,7 @@
             // Footer
             html += '<div class="mp3-masonry-footer">' +
                 '<span class="mp3-masonry-name" title="' + escAttr(f.filename) + '">' + escAttr(displayName) + '</span>' +
+                renderFileTagDots(f) +
                 '<span class="mp3-masonry-meta">' + formatBytes(f.filesize) + '</span>' +
                 '</div>';
 

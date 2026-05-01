@@ -2144,6 +2144,33 @@ body.rex-theme-dark {
     display: inline-block;
 }
 
+#mp3-overlay .mp3-file-tag-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+#mp3-overlay .mp3-file-tag-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+#mp3-overlay .mp3-list-name-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+#mp3-overlay .mp3-list-cell-name .mp3-file-tag-dots {
+    flex-shrink: 0;
+}
+
 #mp3-overlay .mp3-tag-color {
     width: 20px;
     height: 20px;
