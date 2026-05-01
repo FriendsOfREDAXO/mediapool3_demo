@@ -3582,3 +3582,132 @@ body.rex-theme-dark #mp3-overlay .mp3-alt-hint {
     font-size: 13px;
     font-weight: 600;
 }
+
+/* ---- Category Move Button in Sidebar ---- */
+.mp3-cat-move-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--mp3-text-muted, #888);
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .15s, background .15s, color .15s;
+    flex-shrink: 0;
+}
+.mp3-cat-row:hover .mp3-cat-move-btn {
+    opacity: 1;
+}
+.mp3-cat-move-btn:hover {
+    background: var(--mp3-hover-bg, rgba(0,0,0,.08));
+    color: var(--mp3-accent, #4a90d9);
+}
+
+/* ---- Category Move Modal ---- */
+.mp3-cat-move-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mp3-cat-move-modal {
+    background: var(--mp3-card-bg, #fff);
+    color: var(--mp3-text, #333);
+    border: 1px solid var(--mp3-border, #ddd);
+    border-radius: 10px;
+    padding: 24px;
+    min-width: 320px;
+    max-width: 480px;
+    width: 90vw;
+    box-shadow: 0 8px 40px rgba(0,0,0,.22);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mp3-cat-move-modal-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.mp3-cat-move-modal-info {
+    margin: 0;
+    font-size: 13px;
+    color: var(--mp3-text-muted, #888);
+}
+
+.mp3-cat-move-modal-select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--mp3-border, #ccc);
+    border-radius: 6px;
+    background: var(--mp3-input-bg, #fff);
+    color: var(--mp3-text, #333);
+    font-size: 13px;
+}
+
+.mp3-cat-move-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/* Dark mode */
+body.rex-theme-dark .mp3-cat-move-modal {
+    background: var(--mp3-card-bg, #2a2a2a);
+    border-color: var(--mp3-border, #444);
+    color: var(--mp3-text, #eee);
+}
+body.rex-theme-dark .mp3-cat-move-modal-select {
+    background: var(--mp3-input-bg, #333);
+    color: var(--mp3-text, #eee);
+    border-color: var(--mp3-border, #555);
+}
+@media (prefers-color-scheme: dark) {
+    body.rex-has-theme:not(.rex-theme-light) .mp3-cat-move-modal {
+        background: var(--mp3-card-bg, #2a2a2a);
+        border-color: var(--mp3-border, #444);
+        color: var(--mp3-text, #eee);
+    }
+    body.rex-has-theme:not(.rex-theme-light) .mp3-cat-move-modal-select {
+        background: var(--mp3-input-bg, #333);
+        color: var(--mp3-text, #eee);
+        border-color: var(--mp3-border, #555);
+    }
+}
+
+/* ---- File category dropdown in Detail Panel ---- */
+.mp3-move-file-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.mp3-move-file-select {
+    padding: 4px 6px;
+    border: 1px solid var(--mp3-border, #ccc);
+    border-radius: 5px;
+    background: var(--mp3-input-bg, #fff);
+    color: var(--mp3-text, #333);
+    font-size: 12px;
+    max-width: 200px;
+    cursor: pointer;
+}
+
+.mp3-move-file-select:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}

@@ -16,7 +16,8 @@ if (rex::isBackend() && rex::getUser()) {
         $schemaUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_schema', 'prefix' => 'med_']);
         $jsonUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_json_metainfo']);
         $tagsUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_tags']);
-        $inject = '<div id="mp3-root" data-schema-url="' . rex_escape($schemaUrl) . '" data-json-url="' . rex_escape($jsonUrl) . '" data-tags-url="' . rex_escape($tagsUrl) . '"></div>';
+        $categoriesUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_categories']);
+        $inject = '<div id="mp3-root" data-schema-url="' . rex_escape($schemaUrl) . '" data-json-url="' . rex_escape($jsonUrl) . '" data-tags-url="' . rex_escape($tagsUrl) . '" data-categories-url="' . rex_escape($categoriesUrl) . '"></div>';
         $content = str_replace('</body>', $inject . "\n" . '</body>', $content);
         $ep->setSubject($content);
     });

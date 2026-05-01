@@ -813,6 +813,48 @@
         });
     }
 
+    function getCategoriesApiUrl() {
+        var root = document.getElementById('mp3-root');
+        var baseUrl = root ? root.dataset.categoriesUrl : null;
+        if (!baseUrl) {
+            baseUrl = 'index.php?rex-api-call=mediapool3_demo_categories';
+        }
+        return baseUrl;
+    }
+
+    function apiFetchAllCategoriesFlat() {
+        return fetch(getCategoriesApiUrl(), {
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        })
+        .then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        })
+        .then(function (json) {
+            return Array.isArray(json.categories) ? json.categories : [];
+        });
+    }
+
+    function apiMoveCategory(catId, newParentId) {
+        return fetch(getCategoriesApiUrl(), {
+            method: 'PATCH',
+            credentials: 'same-origin',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ id: catId, parent_id: newParentId })
+        })
+        .then(function (r) {
+            return r.json().then(function (body) {
+                if (!r.ok) throw new Error(body.error || 'HTTP ' + r.status);
+                return body;
+            });
+        });
+    }
+
     function getTagsApiUrl(params) {
         var root = document.getElementById('mp3-root');
         var baseUrl = root ? root.dataset.tagsUrl : null;
@@ -2333,6 +2375,12 @@
         html += '<tr><td>Datei vorhanden</td><td>' + (info.file_exists ? '<span class="mp3-badge-yes">✓ Ja</span>' : '<span class="mp3-badge-no">✗ Nein</span>') + '</td></tr>';
         html += '<tr><td>In Verwendung</td><td>' + (info.is_in_use ? '<span class="mp3-badge-yes">✓ Ja</span>' : '<span class="mp3-badge-no">✗ Nein</span>') + '</td></tr>';
         html += '<tr><td>Sammlungen</td><td>' + (detailCollectionNames.length ? escAttr(detailCollectionNames.join(', ')) : '–') + '</td></tr>';
+        html += '<tr class="mp3-move-file-row"><td>Kategorie</td><td>' +
+            '<div class="mp3-move-file-wrap">' +
+            '<select class="mp3-move-file-select" data-current-cat="' + escAttr(String(info.category_id || 0)) + '" title="Datei in andere Kategorie verschieben">' +
+            '<option value="">⏳ Lädt…</option>' +
+            '</select>' +
+            '</div></td></tr>';
         html += '</table>';
 
         html += '<div class="mp3-detail-actions">';
@@ -2358,6 +2406,25 @@
         }
         initDetailTinyEditors(detailPanel);
         updateDetailSaveState();
+
+        // Populate category dropdown asynchronously
+        (function (filename, currentCatId) {
+            var select = detailPanel.querySelector('.mp3-move-file-select');
+            if (!select) return;
+            apiFetchAllCategoriesFlat().then(function (cats) {
+                var opts = '<option value="0">(Hauptverzeichnis)</option>';
+                for (var i = 0; i < cats.length; i++) {
+                    var indent = '';
+                    for (var d = 0; d < cats[i].depth; d++) indent += '\u00a0\u00a0';
+                    opts += '<option value="' + escAttr(String(cats[i].id)) + '"' +
+                        (cats[i].id === currentCatId ? ' selected' : '') + '>' +
+                        indent + escAttr(cats[i].name) + '</option>';
+                }
+                select.innerHTML = opts;
+            }).catch(function () {
+                select.innerHTML = '<option value="">Fehler beim Laden</option>';
+            });
+        })(info.filename, parseInt(info.category_id || 0, 10));
     }
 
     // ---- Rendering ----
@@ -2674,6 +2741,8 @@
             html += escAttr(name) + '</a>';
             html += '<button class="mp3-cat-rename-btn" data-rename-cat="' + id + '" title="Kategorie umbenennen">' +
                 '<i class="fa-solid fa-pen"></i></button>';
+            html += '<button class="mp3-cat-move-btn" data-move-cat="' + id + '" title="Kategorie verschieben">' +
+                '<i class="fa-solid fa-arrows-up-down-left-right"></i></button>';
             html += '<button class="mp3-cat-add-btn mp3-cat-add-sub" data-add-parent="' + id + '" title="Unterkategorie erstellen">' +
                 '<i class="fa-solid fa-plus"></i></button>';
             html += '</div>';
@@ -3033,6 +3102,82 @@
         }
 
         startUpload(files, currentCat, null);
+    }
+
+    function showMoveCategoryModal(catId, catName) {
+        // Build a modal that lets the user pick a new parent for this category
+        var overlay = document.createElement('div');
+        overlay.className = 'mp3-cat-move-modal-overlay';
+        overlay.innerHTML =
+            '<div class="mp3-cat-move-modal">' +
+            '<h5 class="mp3-cat-move-modal-title">' +
+            '<i class="fa-solid fa-arrows-up-down-left-right"></i> Kategorie verschieben</h5>' +
+            '<p class="mp3-cat-move-modal-info">Neue übergeordnete Kategorie für <strong>' + escAttr(catName) + '</strong>:</p>' +
+            '<select class="mp3-cat-move-modal-select">' +
+            '<option value="">⏳ Lädt…</option>' +
+            '</select>' +
+            '<div class="mp3-cat-move-modal-actions">' +
+            '<button class="mp3-cat-move-modal-ok btn btn-primary btn-sm">Verschieben</button>' +
+            '<button class="mp3-cat-move-modal-cancel btn btn-default btn-sm">Abbrechen</button>' +
+            '</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        var select = overlay.querySelector('.mp3-cat-move-modal-select');
+
+        // Collect all sub-ids of catId to exclude them from picker
+        function collectSubIds(id) {
+            var ids = [id];
+            var cached = catCache[id];
+            if (cached && Array.isArray(cached.children)) {
+                for (var i = 0; i < cached.children.length; i++) {
+                    ids = ids.concat(collectSubIds(parseInt(cached.children[i].id, 10)));
+                }
+            }
+            return ids;
+        }
+        var excludeIds = collectSubIds(catId);
+
+        apiFetchAllCategoriesFlat().then(function (cats) {
+            var opts = '<option value="0">(Hauptverzeichnis)</option>';
+            for (var i = 0; i < cats.length; i++) {
+                var cat = cats[i];
+                if (excludeIds.indexOf(cat.id) !== -1) continue;
+                var indent = '';
+                for (var d = 0; d < cat.depth; d++) indent += '\u00a0\u00a0';
+                opts += '<option value="' + escAttr(String(cat.id)) + '">' + indent + escAttr(cat.name) + '</option>';
+            }
+            select.innerHTML = opts;
+        }).catch(function () {
+            select.innerHTML = '<option value="0">(Hauptverzeichnis)</option>';
+        });
+
+        function close() {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }
+
+        overlay.querySelector('.mp3-cat-move-modal-cancel').addEventListener('click', close);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) close();
+        });
+        overlay.querySelector('.mp3-cat-move-modal-ok').addEventListener('click', function () {
+            var newParentId = parseInt(select.value || '0', 10);
+            var okBtn = overlay.querySelector('.mp3-cat-move-modal-ok');
+            okBtn.disabled = true;
+            okBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            apiMoveCategory(catId, newParentId)
+                .then(function () {
+                    catCache = {};
+                    catPath = [];
+                    close();
+                    loadCategories();
+                })
+                .catch(function (err) {
+                    alert('Fehler beim Verschieben: ' + err.message);
+                    okBtn.disabled = false;
+                    okBtn.innerHTML = 'Verschieben';
+                });
+        });
     }
 
     function showCollectionUploadCategoryPicker(files, collection) {
@@ -3596,6 +3741,17 @@
                     .catch(function (err) {
                         alert('Fehler beim Umbenennen: ' + err.message);
                     });
+                return;
+            }
+
+            var moveBtn = e.target.closest('.mp3-cat-move-btn');
+            if (moveBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                var moveCatId = parseInt(moveBtn.getAttribute('data-move-cat'), 10) || 0;
+                if (moveCatId <= 0) return;
+                var moveCatName = catCache[moveCatId] ? String(catCache[moveCatId].name || moveCatId) : String(moveCatId);
+                showMoveCategoryModal(moveCatId, moveCatName);
                 return;
             }
         });
@@ -4257,6 +4413,44 @@
                     localStorage.setItem('mp3_per_page', String(mediaPerPage));
                     loadFiles(currentCat, true);
                 }
+                return;
+            }
+
+            // Move file to a different category
+            var moveCatSelect = e.target.closest('.mp3-move-file-select');
+            if (moveCatSelect && selectedFile) {
+                var newCatId = parseInt(moveCatSelect.value || '0', 10);
+                var prevValue = moveCatSelect.getAttribute('data-current-cat') || '0';
+                moveCatSelect.disabled = true;
+
+                apiUpdate(selectedFile, { category_id: newCatId })
+                    .then(function () {
+                        moveCatSelect.setAttribute('data-current-cat', String(newCatId));
+
+                        // Update local cache
+                        for (var i = 0; i < lastLoadedFiles.length; i++) {
+                            if (lastLoadedFiles[i].filename === selectedFile) {
+                                lastLoadedFiles[i].category_id = newCatId;
+                                break;
+                            }
+                        }
+
+                        // If we're filtering by category, the file may no longer belong here
+                        if (currentCat >= 0 && newCatId !== currentCat) {
+                            lastLoadedFiles = lastLoadedFiles.filter(function (f) {
+                                return f.filename !== selectedFile;
+                            });
+                            hideDetail();
+                            refreshDisplay();
+                        }
+                    })
+                    .catch(function (err) {
+                        alert('Fehler beim Verschieben: ' + err.message);
+                        moveCatSelect.value = prevValue;
+                    })
+                    .then(function () {
+                        moveCatSelect.disabled = false;
+                    });
                 return;
             }
 
