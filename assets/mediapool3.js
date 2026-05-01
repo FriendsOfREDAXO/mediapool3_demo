@@ -12,6 +12,7 @@
 
     // ---- State ----
     var overlay, sidebar, grid, gridWrap, searchInput, statusBar, breadcrumb, detailPanel, multiFooter;
+    var scrollPillTrack, scrollPillThumb;
     var lightboxLayer, lightboxImage, lightboxCaption;
     var currentCat = 0;
     var onSelect = null;
@@ -58,6 +59,33 @@
 
     function qsa(sel, ctx) {
         return Array.prototype.slice.call((ctx || document).querySelectorAll(sel));
+    }
+
+    function isMediaWallMode() {
+        return viewMode === 'mediawall' || viewMode === 'masonry';
+    }
+
+    function updateScrollPill() {
+        if (!gridWrap || !scrollPillTrack || !scrollPillThumb) return;
+
+        var active = isMediaWallMode();
+        scrollPillTrack.style.display = active ? '' : 'none';
+        if (!active) return;
+
+        var maxScroll = Math.max(0, gridWrap.scrollWidth - gridWrap.clientWidth);
+        var trackW = Math.max(1, scrollPillTrack.clientWidth);
+        var minThumbW = 44;
+        var thumbW = maxScroll > 0
+            ? Math.max(minThumbW, Math.round(trackW * (gridWrap.clientWidth / Math.max(gridWrap.scrollWidth, 1))))
+            : trackW;
+
+        scrollPillThumb.style.width = thumbW + 'px';
+
+        var maxThumbPos = Math.max(0, trackW - thumbW);
+        var thumbPos = maxScroll > 0 ? Math.round((gridWrap.scrollLeft / maxScroll) * maxThumbPos) : 0;
+        scrollPillThumb.style.transform = 'translateX(' + thumbPos + 'px)';
+
+        scrollPillTrack.classList.toggle('is-disabled', maxScroll <= 0);
     }
 
     function focusWithoutScroll(el) {
@@ -753,6 +781,7 @@
         if (!multiMode) {
             updateCollectionDragSelectionUI();
         }
+        updateScrollPill();
         updateFilterCounts();
         updatePaginationUi(filtered.length);
     }
@@ -3147,6 +3176,7 @@
                             '<div class="mp3-status" id="mp3-status"></div>' +
                             '<div class="mp3-grid-wrap" id="mp3-grid-wrap">' +
                                 '<div class="mp3-grid" id="mp3-grid"></div>' +
+                                '<div class="mp3-scroll-pill" id="mp3-scroll-pill"><div class="mp3-scroll-pill-thumb" id="mp3-scroll-pill-thumb"></div></div>' +
                             '</div>' +
                             '<div class="mp3-page-footer">' +
                                 '<div class="mp3-page-size">' +
@@ -3199,6 +3229,8 @@
         sidebar   = qs('#mp3-sidebar');
         grid      = qs('#mp3-grid');
         gridWrap  = qs('#mp3-grid-wrap');
+        scrollPillTrack = qs('#mp3-scroll-pill');
+        scrollPillThumb = qs('#mp3-scroll-pill-thumb');
         searchInput = qs('.mp3-search', overlay);
         statusBar = qs('#mp3-status');
         breadcrumb = qs('#mp3-breadcrumb');
@@ -4163,11 +4195,67 @@
         });
 
         gridWrap.addEventListener('scroll', function () {
+            updateScrollPill();
             if (mediaLoading || !mediaHasMore) return;
             var threshold = 180;
-            if ((gridWrap.scrollTop + gridWrap.clientHeight) >= (gridWrap.scrollHeight - threshold)) {
-                loadFiles(currentCat, false);
+            if (isMediaWallMode()) {
+                if ((gridWrap.scrollLeft + gridWrap.clientWidth) >= (gridWrap.scrollWidth - threshold)) {
+                    loadFiles(currentCat, false);
+                }
+            } else {
+                if ((gridWrap.scrollTop + gridWrap.clientHeight) >= (gridWrap.scrollHeight - threshold)) {
+                    loadFiles(currentCat, false);
+                }
             }
+        });
+
+        if (scrollPillTrack && scrollPillThumb) {
+            var draggingPill = false;
+            var dragStartX = 0;
+            var dragStartScrollLeft = 0;
+
+            scrollPillThumb.addEventListener('mousedown', function (e) {
+                if (!isMediaWallMode()) return;
+                draggingPill = true;
+                dragStartX = e.clientX;
+                dragStartScrollLeft = gridWrap.scrollLeft;
+                e.preventDefault();
+            });
+
+            scrollPillTrack.addEventListener('mousedown', function (e) {
+                if (!isMediaWallMode()) return;
+                if (e.target === scrollPillThumb) return;
+
+                var rect = scrollPillTrack.getBoundingClientRect();
+                var trackW = Math.max(1, rect.width);
+                var thumbW = Math.max(1, scrollPillThumb.getBoundingClientRect().width);
+                var maxThumbPos = Math.max(1, trackW - thumbW);
+                var clickX = Math.max(0, Math.min(trackW, e.clientX - rect.left));
+                var thumbPos = Math.max(0, Math.min(maxThumbPos, clickX - (thumbW / 2)));
+                var maxScroll = Math.max(0, gridWrap.scrollWidth - gridWrap.clientWidth);
+                gridWrap.scrollLeft = maxScroll > 0 ? Math.round((thumbPos / maxThumbPos) * maxScroll) : 0;
+                updateScrollPill();
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (!draggingPill) return;
+                var trackW = Math.max(1, scrollPillTrack.clientWidth);
+                var thumbW = Math.max(1, scrollPillThumb.getBoundingClientRect().width);
+                var maxThumbPos = Math.max(1, trackW - thumbW);
+                var maxScroll = Math.max(0, gridWrap.scrollWidth - gridWrap.clientWidth);
+                var scrollPerPx = maxScroll / maxThumbPos;
+                gridWrap.scrollLeft = dragStartScrollLeft + ((e.clientX - dragStartX) * scrollPerPx);
+                updateScrollPill();
+            });
+
+            document.addEventListener('mouseup', function () {
+                draggingPill = false;
+            });
+        }
+
+        window.addEventListener('resize', function () {
+            updateScrollPill();
         });
 
         // Sort dropdown
