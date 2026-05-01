@@ -2160,6 +2160,20 @@ body.rex-theme-dark {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
+#mp3-overlay .mp3-file-tag-dot-mixed {
+    width: 11px;
+    height: 11px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+#mp3-overlay .mp3-file-tag-more {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--mp3-table-td-label);
+    letter-spacing: 0.01em;
+    text-transform: lowercase;
+}
+
 #mp3-overlay .mp3-list-name-wrap {
     display: inline-flex;
     align-items: center;

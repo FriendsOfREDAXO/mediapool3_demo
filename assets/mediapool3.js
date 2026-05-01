@@ -2379,6 +2379,29 @@
         var tags = normalizeSystemTags(file && file.system_tags ? file.system_tags : []);
         if (!tags.length) return '';
 
+        if (tags.length > 5) {
+            var colors = [];
+            for (var c = 0; c < tags.length; c++) {
+                var mixedColor = /^#[0-9a-fA-F]{6}$/.test(String(tags[c].color || '')) ? String(tags[c].color).toLowerCase() : '#4a90d9';
+                if (colors.indexOf(mixedColor) === -1) {
+                    colors.push(mixedColor);
+                }
+                if (colors.length >= 8) break;
+            }
+            var step = 100 / Math.max(colors.length, 1);
+            var stops = [];
+            for (var s = 0; s < colors.length; s++) {
+                var from = Math.round(s * step);
+                var to = Math.round((s + 1) * step);
+                stops.push(colors[s] + ' ' + from + '% ' + to + '%');
+            }
+            var mixedBg = 'conic-gradient(' + stops.join(', ') + ')';
+            return '<div class="mp3-file-tag-dots">' +
+                '<span class="mp3-file-tag-dot mp3-file-tag-dot-mixed" style="background:' + escAttr(mixedBg) + '" title="Mehrere Tags (' + tags.length + ')"></span>' +
+                '<span class="mp3-file-tag-more" title="Mehrere Tags">Mehrere Tags</span>' +
+                '</div>';
+        }
+
         var html = '<div class="mp3-file-tag-dots">';
         for (var i = 0; i < tags.length; i++) {
             var tag = tags[i] || {};
