@@ -5,6 +5,7 @@ supportpage: https://github.com/FriendsOfREDAXO
 
 page:
     title: 'Medienpool via API'
+    block: system
     icon: rex-icon fa-photo-film
     subpages:
         demo:
