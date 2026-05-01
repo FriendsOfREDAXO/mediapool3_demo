@@ -3563,6 +3563,30 @@
             e.dataTransfer.setData('text/mp3-filename', filename);
             e.dataTransfer.setData('text/plain', filename);
             e.dataTransfer.effectAllowed = 'copy';
+
+            // Create a small drag image so the card doesn't obscure the sidebar drop targets
+            var thumb = item.querySelector('img');
+            var ghost = document.createElement('div');
+            ghost.style.cssText = 'position:fixed;top:-200px;left:-200px;width:64px;height:64px;border-radius:6px;overflow:hidden;background:#222;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;';
+            if (thumb && thumb.src) {
+                var img = document.createElement('img');
+                img.src = thumb.src;
+                img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                ghost.appendChild(img);
+            } else {
+                ghost.style.fontSize = '24px';
+                ghost.textContent = '\uD83D\uDCC4';
+            }
+            document.body.appendChild(ghost);
+            e.dataTransfer.setDragImage(ghost, 32, 32);
+            setTimeout(function () { ghost.remove(); }, 0);
+
+            item.classList.add('mp3-card-dragging');
+        });
+
+        grid.addEventListener('dragend', function (e) {
+            var item = e.target.closest('.mp3-card') || e.target.closest('.mp3-list-row') || e.target.closest('.mp3-masonry-card');
+            if (item) item.classList.remove('mp3-card-dragging');
         });
 
         // Detail panel events (event delegation)

@@ -1064,6 +1064,18 @@ body.rex-theme-dark {
     outline-offset: -2px;
     border-radius: 4px;
     background: var(--mp3-cat-hover-bg);
+    transform: scaleY(1.12);
+    transform-origin: center;
+    z-index: 1;
+    position: relative;
+}
+
+#mp3-overlay .mp3-card.mp3-card-dragging,
+#mp3-overlay .mp3-list-row.mp3-card-dragging,
+#mp3-overlay .mp3-masonry-card.mp3-card-dragging {
+    opacity: 0.4;
+    transform: scale(0.96);
+    transition: opacity 0.1s, transform 0.1s;
 }
 
 #mp3-overlay .mp3-collection {
