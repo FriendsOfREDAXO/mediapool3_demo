@@ -1,32 +1,44 @@
-# Medienpool 3.0 – Demo AddOn
-
-> ⚠️ **Dieses AddOn ist eine Demo / ein Proof-of-Concept.** Es dient als Technologie-Vorschau für einen modernen Medienpool-Ersatz im REDAXO CMS Backend. Es ist **nicht** für den Produktiveinsatz gedacht, kann aber als Basis für eine eigene Implementierung genutzt werden.
+# Medienpool 3.0
 
 ![REDAXO](https://img.shields.io/badge/REDAXO-%3E%3D5.10-red) ![PHP](https://img.shields.io/badge/PHP-%3E%3D7.4-blue) ![API](https://img.shields.io/badge/API_AddOn-%3E%3D1.0-green)
 
 ## Was ist das?
 
-Ein modernes Medienpool-Overlay für das REDAXO Backend, das die REST-API des [FriendsOfREDAXO/api](https://github.com/FriendsOfREDAXO/api)-Addons nutzt. Es besteht aus zwei Teilen:
+Ein vollständiger, moderner Medienpool für das REDAXO CMS Backend – als eigenständige Verwaltungsoberfläche und als einbettbares Picker-Overlay gleichermaßen. Das AddOn nutzt die REST-API des [FriendsOfREDAXO/api](https://github.com/FriendsOfREDAXO/api)-Addons und bietet eine vollwertige Alternative zum klassischen REDAXO-Medienpool.
 
-1. **Overlay-Picker** (`MP3.open()`) – Vollbild-Overlay zur Medienauswahl
+Es besteht aus zwei Teilen:
+
+1. **Medienpool-Overlay** (`MP3.open()`) – Vollbild-Overlay zur Medienverwaltung und -auswahl
 2. **Input-Widget** (`<input class="mp3-widget">`) – Ersetzt ein Input-Feld durch eine visuelle Medienauswahl mit Vorschau
 
 ## Features
 
-### Overlay-Picker
+### Medienpool-Overlay
 - 📁 **Kategorie-Baum** – Aufklappbare Sidebar mit allen Medienkategorien
-- 🔍 **Suche** – Client-seitige Dateinamen-Suche in Echtzeit
+- 🔍 **Suche** – Serverseitige Suche über Titel, Dateiname, Originalname und JSON-Metadaten
 - 🏷️ **Typ-Filter** – Filter-Pills für Bilder, Videos, Audio, Dokumente, Sonstige (mit Anzahl-Badges)
+- 🏷️ **Tag-Filter** – Mehrfachauswahl aus vorhandenen Tags (Collection-Tags werden ausgeblendet)
 - ↕️ **Sortierung** – 6 Sortieroptionen (Datum, Dateiname, Titel – jeweils auf-/absteigend)
+- 📄 **Pagination** – konfigurierbare Seitengröße inkl. „Mehr laden“
 - 🖼️ **Grid, Liste & Masonry** – Umschaltbar zwischen Kachel-, Tabellen- und Masonry-Ansicht
-- 📄 **Detail-Panel** – Slide-in Panel mit Vorschau, editierbarem Titel + JSON-Metadaten, Verwendungsstatus und Sammlungs-Info (read-only)
+- 📄 **Detail-Panel** – Vorschau, editierbarer Titel, JSON-Metadaten, Legacy-Metadaten (einblendbar), Verwendungsstatus, Sammlungs-Info (read-only)
+- 🔁 **Medien tauschen** – Dateiinhalt ersetzen bei gleichem Dateinamen und kompatibler Dateiendung
+- ⬇️ **Download** – Datei direkt aus dem Detailpanel herunterladen
+- 🗑️ **Löschen** – Datei löschen (inkl. In-Use-Schutz)
 - ☁️ **Upload** – Dateien per Drag & Drop oder Upload-Button hochladen, sequenzieller Upload mit Fortschrittsanzeige
 - 📋 **Paste-Upload** – Dateien und Bilder per **Cmd+V / Ctrl+V** direkt in die aktuelle Kategorie einfügen (Screenshots, Browser-Bilder, Finder/Explorer-Dateien)
-- 📂 **Kategorie erstellen** – Inline-Erstellung neuer Medienkategorien
+- 📂 **Kategorie erstellen/umbenennen** – Kategorieverwaltung direkt in der Sidebar
 - 🌐 **Alle Medien** – Kategorieübergreifende Ansicht aller Medien
 - 🍞 **Breadcrumb** – Navigation mit Pfadanzeige
 - 📱 **Mobile-optimiert** – Offcanvas-Sidebar, Bottom-Sheet Detail-Panel
-- 🌙 **Dark Mode** – Vollständige Unterstützung für Light, Dark und Auto-Modus
+- 🌙 **Dark Mode Toggle** – Umschaltbar im Overlay, unabhängig vom REDAXO-Theme (Persistenz via localStorage)
+
+### Sammlungen (Collections)
+- 📚 **Sammlungskatalog** – Sammlungen anlegen, umbenennen und löschen
+- 🎯 **Modus-Trennung** – Entweder Kategorie-Modus oder Sammlungs-Modus aktiv
+- 🔖 **Zuordnung pro Medium** – In Grid/Liste/Masonry per Lesezeichen-Button zur aktiven Sammlung
+- 🧲 **Drag-and-Drop** – Medien auf Sammlung in der Sidebar ziehen, um sie zuzuordnen
+- 🧾 **Detailanzeige** – Im Detailpanel wird nur angezeigt, in welchen Sammlungen das Medium liegt
 
 ### Multi-Select
 - ☑️ **Mehrfachauswahl** – Dateien per Klick an-/abwählen (Checkbox auf jeder Karte)
@@ -56,7 +68,6 @@ Im REDAXO Backend unter **API → Konfiguration** müssen folgende Backend-Endpu
 | `backend/media/list` | GET | Medienliste laden (mit Filter & Paginierung) |
 | `backend/media/get` | GET | Detail-Informationen zu einer Datei |
 | `backend/media/add` | POST | Dateien hochladen |
-| `backend/media/get` | GET | Detail-Informationen zu einer Datei |
 | `backend/media/delete` | DELETE | Datei löschen |
 | `backend/media/update` | PATCH/POST | Datei updaten / Dateiinhalt ersetzen |
 | `backend/media/category/list` | GET | Kategorien laden |
@@ -273,7 +284,6 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 
 - **Demo / Proof-of-Concept** – Nicht für den Produktiveinsatz optimiert
 - **Kein Chunked Upload** – Große Dateien werden nicht in Chunks übertragen
-- **Client-seitige Suche** – Suche und Filter nur über bereits geladene Dateien
 - **Kein YForm-Value** – Nur als HTML-Input-Widget, nicht als eigener YForm-Feldtyp
 
 > **Hinweis Paste-Upload:** Der Clipboard-Upload per Cmd+V/Ctrl+V funktioniert mit Screenshots, kopierten Bildern aus dem Browser sowie mit Dateien, die im Finder/Explorer per Cmd+C/Ctrl+C kopiert wurden.
