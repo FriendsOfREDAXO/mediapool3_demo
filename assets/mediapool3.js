@@ -3514,7 +3514,7 @@
             function isMobile() { return window.innerWidth <= 768 || overlay.classList.contains('mp3-compact'); }
 
             // Track compact mode via ResizeObserver
-            var COMPACT_BREAKPOINT = 700;
+            var COMPACT_BREAKPOINT = 760;
             if (typeof ResizeObserver !== 'undefined') {
                 var compactObserver = new ResizeObserver(function (entries) {
                     for (var i = 0; i < entries.length; i++) {
