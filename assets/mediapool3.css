@@ -832,6 +832,42 @@ body.rex-theme-dark {
     padding: 8px 0;
 }
 
+#mp3-overlay .mp3-cat-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 8px 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--mp3-input-border);
+    border-radius: 6px;
+    background: var(--mp3-input-bg);
+    color: var(--mp3-table-td-label);
+}
+
+#mp3-overlay .mp3-cat-search-wrap i {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+#mp3-overlay .mp3-cat-search-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--mp3-input-text);
+    font-size: 12px;
+    outline: none;
+}
+
+#mp3-overlay .mp3-cat-search-empty {
+    margin: 0 12px 8px;
+    font-size: 12px;
+    color: var(--mp3-table-td-label);
+}
+
+#mp3-overlay .mp3-cat-hidden {
+    display: none !important;
+}
+
 /* ---- Category Tree ---- */
 #mp3-overlay .mp3-cat-tree {
     user-select: none;

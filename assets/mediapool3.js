@@ -51,6 +51,7 @@
     var editorCanvasClangId = null;  // clang id (null = no translation)
     var pageScrollTopBeforeOpen = 0;
     var pageMainScrollTopBeforeOpen = 0;
+    var categorySearchTerm = '';
 
     // ---- Helpers ----
     function qs(sel, ctx) {
@@ -2554,9 +2555,78 @@
         grid.innerHTML = html;
     }
 
+    function applyCategorySearchFilter() {
+        if (!sidebar) return;
+
+        var input = qs('.mp3-cat-search-input', sidebar);
+        var term = String((input ? input.value : categorySearchTerm) || '').trim().toLowerCase();
+        categorySearchTerm = term;
+
+        var headers = qsa('.mp3-cat-header', sidebar);
+        var nodes = qsa('.mp3-cat-node', sidebar);
+        var childrenBlocks = qsa('.mp3-cat-children', sidebar);
+        var emptyHint = qs('.mp3-cat-search-empty', sidebar);
+
+        if (!term) {
+            headers.forEach(function (el) { el.classList.remove('mp3-cat-hidden'); });
+            nodes.forEach(function (el) { el.classList.remove('mp3-cat-hidden', 'mp3-cat-match'); });
+            childrenBlocks.forEach(function (el) { el.classList.remove('mp3-cat-hidden'); });
+            if (emptyHint) emptyHint.remove();
+            return;
+        }
+
+        headers.forEach(function (header) {
+            var label = qs('.mp3-cat', header);
+            var text = String(label ? label.textContent : '').toLowerCase();
+            header.classList.toggle('mp3-cat-hidden', text.indexOf(term) === -1);
+        });
+
+        nodes.forEach(function (node) {
+            var label = qs('.mp3-cat', node);
+            var text = String(label ? label.textContent : '').toLowerCase();
+            var isMatch = text.indexOf(term) !== -1;
+            node.classList.toggle('mp3-cat-match', isMatch);
+            node.classList.toggle('mp3-cat-hidden', !isMatch);
+        });
+
+        // Keep category path visible for each matching node.
+        nodes.forEach(function (node) {
+            if (!node.classList.contains('mp3-cat-match')) return;
+            var parent = node.parentElement;
+            while (parent && parent !== sidebar) {
+                var parentNode = parent.closest('.mp3-cat-node');
+                if (!parentNode) break;
+                parentNode.classList.remove('mp3-cat-hidden');
+                parent = parentNode.parentElement;
+            }
+        });
+
+        childrenBlocks.forEach(function (block) {
+            var visible = !!qs('.mp3-cat-node:not(.mp3-cat-hidden)', block);
+            block.classList.toggle('mp3-cat-hidden', !visible);
+        });
+
+        var visibleHeaders = headers.filter(function (el) { return !el.classList.contains('mp3-cat-hidden'); }).length;
+        var visibleNodes = nodes.filter(function (el) { return !el.classList.contains('mp3-cat-hidden'); }).length;
+        if ((visibleHeaders + visibleNodes) === 0) {
+            if (!emptyHint) {
+                emptyHint = document.createElement('div');
+                emptyHint.className = 'mp3-cat-search-empty';
+                sidebar.insertBefore(emptyHint, qs('.mp3-cat-tree', sidebar) || sidebar.firstChild);
+            }
+            emptyHint.textContent = 'Keine Kategorie gefunden';
+        } else if (emptyHint) {
+            emptyHint.remove();
+        }
+    }
+
     function renderCategories(cats) {
         // Build root-level category tree item HTML
-        var html = '<div class="mp3-cat-tree">';
+        var html = '<div class="mp3-cat-search-wrap">' +
+            '<i class="fa-solid fa-magnifying-glass"></i>' +
+            '<input type="text" class="mp3-cat-search-input" placeholder="Kategorie finden..." value="' + escAttr(categorySearchTerm) + '">' +
+            '</div>' +
+            '<div class="mp3-cat-tree">';
         // "Alle Medien" button
         html += '<div class="mp3-cat-header">';
         html += '<a class="mp3-cat' + (currentCat === -1 ? ' mp3-cat-active' : '') + '" data-cat="-1">' +
@@ -2576,6 +2646,7 @@
         html += '</div>';
         html += renderCollectionsSection();
         sidebar.innerHTML = html;
+        applyCategorySearchFilter();
     }
 
     /**
@@ -3568,6 +3639,23 @@
                     rerenderSidebar();
                 }
             }, 150);
+        });
+
+        // Category search (event delegation)
+        sidebar.addEventListener('input', function (e) {
+            if (!e.target.closest('.mp3-cat-search-input')) return;
+            applyCategorySearchFilter();
+        });
+
+        sidebar.addEventListener('keydown', function (e) {
+            var searchInput = e.target.closest('.mp3-cat-search-input');
+            if (!searchInput) return;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                searchInput.value = '';
+                applyCategorySearchFilter();
+                focusWithoutScroll(searchInput);
+            }
         });
 
         // Category clicks (event delegation)
