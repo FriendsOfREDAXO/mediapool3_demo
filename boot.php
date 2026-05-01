@@ -13,7 +13,10 @@ if (rex::isBackend() && rex::getUser()) {
 
     rex_extension::register('OUTPUT_FILTER', static function (rex_extension_point $ep) {
         $content = $ep->getSubject();
-        $inject = '<div id="mp3-root"></div>';
+        $schemaUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_schema', 'prefix' => 'med_']);
+        $jsonUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_json_metainfo']);
+        $tagsUrl = rex_url::backendController(['rex-api-call' => 'mediapool3_demo_tags']);
+        $inject = '<div id="mp3-root" data-schema-url="' . rex_escape($schemaUrl) . '" data-json-url="' . rex_escape($jsonUrl) . '" data-tags-url="' . rex_escape($tagsUrl) . '"></div>';
         $content = str_replace('</body>', $inject . "\n" . '</body>', $content);
         $ep->setSubject($content);
     });

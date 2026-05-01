@@ -1,0 +1,16 @@
+<?php
+
+$I18N = new rex_i18n('de_de');
+
+// Metainfo Fields Management
+$I18N->msg('mediapool3_demo_metainfo_title', 'Metainfo Felder');
+$I18N->msg('mediapool3_demo_field_deleted', 'Feld gelöscht');
+$I18N->msg('mediapool3_demo_field_not_found', 'Feld nicht gefunden');
+$I18N->msg('mediapool3_demo_invalid_input', 'Ungültige Eingabe');
+$I18N->msg('mediapool3_demo_field_saved', 'Feld gespeichert');
+$I18N->msg('mediapool3_demo_no_fields', 'Noch keine Felder definiert. Erstelle eines um zu beginnen.');
+$I18N->msg('mediapool3_demo_fields_scope_hint', 'Diese Felddefinitionen gelten nur für das Medienpool 3.0 Overlay. Sie erscheinen nicht in "Meta Infos -> Media", da sie als JSON in med_json_data gespeichert werden.');
+
+// ALT Field
+$I18N->msg('mediapool3_demo_alt_decorative', 'Dekoratives Bild (kein ALT-Text nötig)');
+$I18N->msg('mediapool3_demo_alt_required', 'ALT-Text wird für die Barrierefreiheit empfohlen!');

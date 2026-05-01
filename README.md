@@ -18,8 +18,8 @@ Ein modernes Medienpool-Overlay für das REDAXO Backend, das die REST-API des [F
 - 🔍 **Suche** – Client-seitige Dateinamen-Suche in Echtzeit
 - 🏷️ **Typ-Filter** – Filter-Pills für Bilder, Videos, Audio, Dokumente, Sonstige (mit Anzahl-Badges)
 - ↕️ **Sortierung** – 6 Sortieroptionen (Datum, Dateiname, Titel – jeweils auf-/absteigend)
-- 🖼️ **Grid & Listenansicht** – Umschaltbar zwischen Kachel- und Tabellenansicht
-- 📄 **Detail-Panel** – Slide-in Panel mit Vorschau, Metadaten, Verwendungsstatus
+- 🖼️ **Grid, Liste & Masonry** – Umschaltbar zwischen Kachel-, Tabellen- und Masonry-Ansicht
+- 📄 **Detail-Panel** – Slide-in Panel mit Vorschau, editierbarem Titel + JSON-Metadaten, Verwendungsstatus und Sammlungs-Info (read-only)
 - ☁️ **Upload** – Dateien per Drag & Drop oder Upload-Button hochladen, sequenzieller Upload mit Fortschrittsanzeige
 - 📋 **Paste-Upload** – Dateien und Bilder per **Cmd+V / Ctrl+V** direkt in die aktuelle Kategorie einfügen (Screenshots, Browser-Bilder, Finder/Explorer-Dateien)
 - 📂 **Kategorie erstellen** – Inline-Erstellung neuer Medienkategorien
@@ -55,9 +55,13 @@ Im REDAXO Backend unter **API → Konfiguration** müssen folgende Backend-Endpu
 |---|---|---|
 | `backend/media/list` | GET | Medienliste laden (mit Filter & Paginierung) |
 | `backend/media/get` | GET | Detail-Informationen zu einer Datei |
-| `backend/media/upload` | POST | Dateien hochladen |
+| `backend/media/add` | POST | Dateien hochladen |
+| `backend/media/get` | GET | Detail-Informationen zu einer Datei |
+| `backend/media/delete` | DELETE | Datei löschen |
+| `backend/media/update` | PATCH/POST | Datei updaten / Dateiinhalt ersetzen |
 | `backend/media/category/list` | GET | Kategorien laden |
-| `backend/media/category/create` | POST | Neue Kategorie erstellen |
+| `backend/media/category/add` | POST | Neue Kategorie erstellen |
+| `backend/media/category/update` | PATCH | Kategorie umbenennen |
 
 > **Wichtig:** Es werden die `backend/`-Endpunkte verwendet (Session-basierte Authentifizierung), nicht die Token-basierten Endpunkte.
 
@@ -195,15 +199,57 @@ mediapool3_demo/
 
 ### API-Kommunikation
 
-```
-GET  /api/backend/media?per_page=1000                        → Alle Medien
-GET  /api/backend/media?per_page=1000&filter[category_id]=4  → Medien in Kategorie 4
-GET  /api/backend/media/{filename}/info                      → Detail-Info (inkl. is_in_use)
-POST /api/backend/media                                      → Upload (FormData: file + category_id)
-GET  /api/backend/media/category                             → Root-Kategorien
-GET  /api/backend/media/category?filter[category_id]=4       → Unterkategorien
-POST /api/backend/media/category                             → Kategorie erstellen (JSON: name + parent_id)
-```
+Der Picker nutzt aktuell folgende Endpunkte.
+
+### Genutzte API-Endpunkte (Backend API AddOn)
+
+| Methode | Endpoint | Zweck |
+|---|---|---|
+| GET | `/api/backend/media?per_page={n}&page={n}` | Medienliste mit Paging |
+| GET | `/api/backend/media?filter[category_id]={id}` | Medien je Kategorie |
+| GET | `/api/backend/media?filter[title]={query}` | Suche (Server-seitig) |
+| GET | `/api/backend/media/{filename}/info` | Dateidetails inkl. `is_in_use` |
+| GET | `/api/backend/media/{filename}/metainfo` | Legacy `med_*` Felder anzeigen |
+| GET | `/api/backend/media/{filename}/file` | Datei-Download |
+| POST | `/api/backend/media` | Upload (`file`, `category_id`) |
+| PATCH | `/api/backend/media/{filename}/update` | Titel/Kategorie etc. aktualisieren |
+| POST | `/api/backend/media/{filename}/update` | Dateiinhalt ersetzen (Dateiname bleibt) |
+| DELETE | `/api/backend/media/{filename}/delete` | Datei löschen |
+| GET | `/api/backend/media/category` | Root-Kategorien |
+| GET | `/api/backend/media/category?filter[category_id]={id}` | Unterkategorien |
+| POST | `/api/backend/media/category` | Kategorie erstellen |
+| PATCH | `/api/backend/media/category/{id}` | Kategorie umbenennen |
+
+### Genutzte AddOn-interne API-Endpunkte (`rex_api_function`)
+
+| Methode | Endpoint | Zweck |
+|---|---|---|
+| GET | `index.php?rex-api-call=mediapool3_demo_json_metainfo&filename={filename}` | JSON-Metadaten + Felddefinitionen + System-Tags eines Mediums laden |
+| PATCH | `index.php?rex-api-call=mediapool3_demo_json_metainfo&filename={filename}` | JSON-Metadaten + System-Tags eines Mediums speichern |
+| GET | `index.php?rex-api-call=mediapool3_demo_tags[&filenames=a,b,c]` | Tag-Katalog und Datei-Tag-Zuordnungen laden |
+| PATCH | `index.php?rex-api-call=mediapool3_demo_tags` | Sammlung anlegen/umbenennen/löschen (`action=collection_*`) |
+
+### Wie Metadaten gespeichert werden
+
+- Die strukturierten Metadaten werden als JSON im Feld `rex_media.med_json_data` gespeichert.
+- Laden/Speichern erfolgt über `rex_api_mediapool3_demo_json_metainfo`.
+- Das Payload enthält:
+    - `data`: Feldwerte
+    - `fields`: konfigurierte Felddefinitionen
+    - `clangs`: Sprachen
+    - `system_tags`: Tags des Mediums
+    - `system_tag_catalog`: globaler Tag-Katalog
+- Beim Speichern werden nur bekannte Felder verarbeitet; Widget-Werte werden normalisiert.
+
+### Wie Sammlungen gespeichert werden
+
+- Sammlungen sind technisch System-Tags mit Prefix `collection:`.
+- Ein Medium kann in mehreren Sammlungen liegen (n:m Zuordnung).
+- Persistenz erfolgt über `SystemTagManager` in zwei Tabellen:
+    - `rex_mediapool3_demo_tags` (Tag-Katalog inkl. Farbe)
+    - `rex_mediapool3_demo_media_tags` (Zuordnung Medium ↔ Tag)
+- Die Sidebar-Sammlungen (inkl. Drag-and-Drop-Zuordnung) arbeiten auf dieser Tag-Struktur.
+- Im Detailpanel werden Collection-Tags nicht mehr bearbeitet; dort wird nur read-only angezeigt, in welchen Sammlungen ein Medium liegt.
 
 ### Dark Mode
 
@@ -226,7 +272,7 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 ## Bekannte Einschränkungen
 
 - **Demo / Proof-of-Concept** – Nicht für den Produktiveinsatz optimiert
-- **Kein Pagination** – Lädt bis zu 1000 Dateien pro Kategorie auf einmal
+- **Kein Chunked Upload** – Große Dateien werden nicht in Chunks übertragen
 - **Client-seitige Suche** – Suche und Filter nur über bereits geladene Dateien
 - **Kein YForm-Value** – Nur als HTML-Input-Widget, nicht als eigener YForm-Feldtyp
 
@@ -237,7 +283,8 @@ Unter **Medienpool 3.0 → Debug** (nur für Admins) gibt es:
 Ideen für eine produktionsreife Version:
 
 - [x] Medien bearbeiten (Titel)
-- [ ] Medien bearbeiten (Kategorie, Medienfelder)
+- [ ] Medien bearbeiten (Kategorie)
+- [x] Medien bearbeiten (Titel, JSON-Metadaten)
 - [x] Medien löschen
 - [x] Letzte Ansicht (Grid/Liste), Sortierung und Kategorie merken
 - [ ] Paginierung / Lazy Loading (aktuell: bis zu 1000 Dateien pro Kategorie auf einmal) und server-seitige Suche (aktuell: client-seitig im geladenen Array)

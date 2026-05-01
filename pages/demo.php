@@ -3,6 +3,7 @@
 // ---- Section 1: Overlay Demo ----
 $content1 = '
 <p>Klicken Sie auf den Button, um den Medienpool 3.0 Overlay direkt zu öffnen.</p>
+<p><small class="text-muted">Im Detail-Panel lassen sich jetzt nicht nur der Titel, sondern auch vorhandene <code>med_*</code>-Metadaten direkt speichern.</small></p>
 <div style="display:flex;gap:10px;flex-wrap:wrap;">
     <button class="btn btn-default" onclick="MP3.open()">
         <i class="fa-solid fa-eye"></i> Nur Ansehen
