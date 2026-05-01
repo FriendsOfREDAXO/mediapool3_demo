@@ -34,19 +34,27 @@ $fragment->setVar('title', 'Overlay – Direkte API-Nutzung', false);
 $fragment->setVar('body', $content1, false);
 echo $fragment->parse('core/page/section.php');
 
+// ---- Dynamically pick example media from DB ----
+$sql = rex_sql::factory();
+$anyMedia = $sql->getArray('SELECT filename FROM ' . rex::getTable('media') . ' ORDER BY id ASC LIMIT 3');
+$demoFile1 = !empty($anyMedia[0]['filename']) ? $anyMedia[0]['filename'] : '';
+$demoFile2 = !empty($anyMedia[1]['filename']) ? $anyMedia[1]['filename'] : '';
+$demoFile3 = !empty($anyMedia[2]['filename']) ? $anyMedia[2]['filename'] : '';
+$demoMultiVal = implode(',', array_filter([$demoFile1, $demoFile2, $demoFile3]));
+
 // ---- Section 2: Single Widget ----
 $content2 = '
 <p>Ein <code>&lt;input class="mp3-widget"&gt;</code> wird automatisch zu einem Media-Picker mit Vorschau.</p>
 
 <div class="form-group">
-    <label>Titelbild (Einzelmedium)</label>
+    <label>Titelbild (Einzelmedium, leer)</label>
     <input class="mp3-widget form-control" name="demo_image" value="">
 </div>
 
 <div class="form-group">
-    <label>Dokument (Einzelmedium, mit Vorauswahl)</label>
-    <input class="mp3-widget form-control" name="demo_doc" value="abfallkalender_2025.pdf">
-</div>
+    <label>Einzelmedium (mit erstem vorhandenen Medium vorbelegt)</label>
+    <input class="mp3-widget form-control" name="demo_doc" value="' . rex_escape($demoFile1) . '">
+</div>';
 
 <h4 style="margin-top:25px;">Verwendung</h4>
 <pre style="font-size:12px;background:#f5f5f5;padding:12px;border-radius:4px;"><code>&lt;!-- Einfach die CSS-Klasse mp3-widget setzen --&gt;
@@ -72,9 +80,9 @@ $content3 = '
 </div>
 
 <div class="form-group">
-    <label>Downloads (Mehrfachauswahl, mit Vorauswahl)</label>
+    <label>Mehrfachauswahl (mit ersten vorhandenen Medien vorbelegt)</label>
     <input class="mp3-widget form-control" name="demo_downloads" data-mp3-multiple="true"
-        value="abfallkalender_2025.pdf,imgp1636.jpg,create-qr-code_3.png">
+        value="' . rex_escape($demoMultiVal) . '">
 </div>
 
 <h4 style="margin-top:25px;">Verwendung</h4>
