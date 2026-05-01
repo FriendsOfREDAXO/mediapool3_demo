@@ -2087,17 +2087,18 @@ body.rex-theme-dark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
-    min-width: 42px;
+    min-width: 56px;
     text-align: center;
     border: 1px solid var(--mp3-edit-input-border);
     border-left: 0;
     border-radius: 0 4px 4px 0;
-    padding: 0 7px;
-    background: var(--mp3-table-td-border);
+    padding: 0 9px;
+    background: var(--mp3-edit-input-bg);
     color: var(--mp3-table-td-label);
     text-transform: uppercase;
+    letter-spacing: 0.02em;
     line-height: 1;
     flex-shrink: 0;
 }
