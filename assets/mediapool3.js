@@ -162,6 +162,35 @@
         return String(s || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
     }
 
+    function richTextToPlainText(raw) {
+        var s = String(raw || '');
+        if (!s) return '';
+
+        // Preserve visible line breaks before stripping tags.
+        s = s.replace(/<br\s*\/?>/gi, '\n');
+        s = s.replace(/<\/p>\s*<p[^>]*>/gi, '\n\n');
+        s = s.replace(/<\/div>\s*<div[^>]*>/gi, '\n');
+
+        if (s.indexOf('<') !== -1 && typeof document !== 'undefined') {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = s;
+            s = tmp.textContent || tmp.innerText || '';
+        }
+
+        // Normalize nbsp artifacts from TinyMCE and pasted content.
+        s = s.replace(/&nbsp;/gi, ' ');
+        s = s.replace(/\u00a0/g, ' ');
+        s = s.replace(/\r\n?/g, '\n');
+        s = s.replace(/^[ \t\u00a0]+/, '');
+
+        return s;
+    }
+
+    function tinyPreviewText(value) {
+        var text = richTextToPlainText(value);
+        return text ? text.slice(0, 120) : '–';
+    }
+
     function formatDate(v) {
         if (!v) return '–';
         var d = (typeof v === 'number' || /^\d{9,}$/.test(String(v)))
@@ -1625,11 +1654,12 @@
         if (!editorCanvasOpen) return;
         var val = '';
         if (typeof tinymce !== 'undefined' && editorCanvasTinyId && tinymce.get(editorCanvasTinyId)) {
-            val = tinymce.get(editorCanvasTinyId).getContent();
+            val = tinymce.get(editorCanvasTinyId).getContent({ format: 'text' });
         } else {
             var ta = qs('#mp3-editor-canvas-textarea', overlay);
             if (ta) val = ta.value;
         }
+        val = richTextToPlainText(val);
 
         // Write back to hidden input in detail panel
         if (detailPanel && editorCanvasFieldKey !== null) {
@@ -1643,7 +1673,7 @@
                 var row = hi.nextElementSibling;
                 if (row && row.classList.contains('mp3-tiny-canvas-row')) {
                     var preview = row.querySelector('.mp3-tiny-canvas-preview');
-                    if (preview) preview.textContent = val ? val.replace(/<[^>]+>/g, '').slice(0, 120) || '–' : '–';
+                    if (preview) preview.textContent = tinyPreviewText(val);
                 }
             }
             updateDetailSaveState();
@@ -1891,7 +1921,7 @@
                     html += '<input type="hidden" data-json-field="' + escAttr(field.key) + '" data-clang="' + escAttr(cl.id) + '" class="mp3-tiny-canvas-value" value="' + escAttr(clVal) + '">';
                     html += '<div class="mp3-tiny-canvas-row">';
                     html += '<span class="mp3-lang-badge">' + escAttr(cl.code || cl.name) + '</span>';
-                    html += '<div class="mp3-tiny-canvas-preview">' + (clVal ? clVal.replace(/<[^>]+>/g, '').slice(0, 120) || '–' : '–') + '</div>';
+                    html += '<div class="mp3-tiny-canvas-preview">' + escAttr(tinyPreviewText(clVal)) + '</div>';
                     html += '<button type="button" class="mp3-tiny-canvas-open" data-canvas-field="' + escAttr(field.key) + '" data-canvas-clang="' + escAttr(cl.id) + '" data-canvas-label="' + escAttr((field.label || field.key) + ' (' + (cl.code || cl.name) + ')') + '"><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</button>';
                     html += '</div>';
                 }
@@ -1899,7 +1929,7 @@
                 var tinyVal = String(value || '');
                 html += '<input type="hidden" data-json-field="' + escAttr(field.key) + '" class="mp3-tiny-canvas-value" value="' + escAttr(tinyVal) + '">';
                 html += '<div class="mp3-tiny-canvas-row">';
-                html += '<div class="mp3-tiny-canvas-preview">' + (tinyVal ? tinyVal.replace(/<[^>]+>/g, '').slice(0, 120) || '–' : '–') + '</div>';
+                html += '<div class="mp3-tiny-canvas-preview">' + escAttr(tinyPreviewText(tinyVal)) + '</div>';
                 html += '<button type="button" class="mp3-tiny-canvas-open" data-canvas-field="' + escAttr(field.key) + '" data-canvas-label="' + escAttr(field.label || field.key) + '"><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</button>';
                 html += '</div>';
             }
