@@ -3368,3 +3368,77 @@ body.rex-theme-dark #mp3-overlay .mp3-alt-hint {
         padding: 10px;
     }
 }
+
+/* ---- Collection Upload Category Picker Modal ---- */
+#mp3-overlay .mp3-catpick-modal {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+}
+
+#mp3-overlay .mp3-catpick-box {
+    background: var(--mp3-bg);
+    border: 1px solid var(--mp3-border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .35);
+}
+
+#mp3-overlay .mp3-catpick-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#mp3-overlay .mp3-catpick-info {
+    font-size: 13px;
+    color: var(--mp3-text-muted);
+    margin-bottom: 14px;
+}
+
+#mp3-overlay .mp3-catpick-select {
+    width: 100%;
+    padding: 7px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--mp3-border);
+    background: var(--mp3-input-bg, var(--mp3-bg));
+    color: var(--mp3-text);
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+#mp3-overlay .mp3-catpick-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+#mp3-overlay .mp3-catpick-cancel {
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--mp3-border);
+    background: transparent;
+    color: var(--mp3-text);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+#mp3-overlay .mp3-catpick-confirm {
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: none;
+    background: var(--mp3-accent, #4a90d9);
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}

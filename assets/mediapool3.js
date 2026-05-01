@@ -2844,9 +2844,61 @@
         if (!fileList || !fileList.length) return;
 
         var files = Array.prototype.slice.call(fileList);
-        var total = files.length;
-        var done = 0;
-        var failed = 0;
+
+        // In collection mode: ask which category to upload to, then assign to collection
+        if (currentCat === -1) {
+            var col = getActiveCollection();
+            showCollectionUploadCategoryPicker(files, col);
+            return;
+        }
+
+        startUpload(files, currentCat, null);
+    }
+
+    function showCollectionUploadCategoryPicker(files, collection) {
+        // Build flat category list from cache
+        var options = '<option value="0">(Stamm / kein Kategorie)</option>';
+        var rootCats = Array.isArray(catCache._root) ? catCache._root : [];
+        function addOptions(list, depth) {
+            for (var i = 0; i < list.length; i++) {
+                var c = list[i];
+                options += '<option value="' + escAttr(String(c.id)) + '">' + '\u00A0\u00A0\u00A0\u00A0'.repeat(depth) + escAttr(c.name) + '</option>';
+                var cached = catCache[c.id];
+                if (cached && cached.loaded && Array.isArray(cached.children)) {
+                    addOptions(cached.children, depth + 1);
+                }
+            }
+        }
+        addOptions(rootCats, 0);
+
+        var colName = collection ? collection.name : '';
+        var modal = document.createElement('div');
+        modal.className = 'mp3-catpick-modal';
+        modal.innerHTML =
+            '<div class="mp3-catpick-box">' +
+            '<div class="mp3-catpick-title"><i class="fa-solid fa-folder-open"></i> Kategorie für Upload wählen</div>' +
+            '<p class="mp3-catpick-info">Im Sammlungs-Modus muss eine Kategorie gewählt werden. Die Dateien werden danach automatisch der Sammlung <strong>' + escAttr(colName) + '</strong> zugeordnet.</p>' +
+            '<select class="mp3-catpick-select">' + options + '</select>' +
+            '<div class="mp3-catpick-actions">' +
+            '<button type="button" class="mp3-catpick-cancel">Abbrechen</button>' +
+            '<button type="button" class="mp3-catpick-confirm">Hochladen</button>' +
+            '</div>' +
+            '</div>';
+
+        overlay.appendChild(modal);
+
+        modal.querySelector('.mp3-catpick-cancel').addEventListener('click', function () {
+            modal.remove();
+        });
+
+        modal.querySelector('.mp3-catpick-confirm').addEventListener('click', function () {
+            var catId = parseInt(modal.querySelector('.mp3-catpick-select').value || '0', 10);
+            modal.remove();
+            startUpload(files, catId, collection ? collection.name : null);
+        });
+    }
+
+    function startUpload(files, catId, assignToCollectionName) {
 
         // Build upload tracker UI
         var html = '<div class="mp3-upload-tracker">';
@@ -2871,18 +2923,36 @@
         html += '</div>';
         grid.innerHTML = html;
 
+        var total = files.length;
+        var done = 0;
+        var failed = 0;
+        var uploadedFilenames = []; // track successfully uploaded filenames for collection assignment
+
         // Upload one at a time sequentially
         function uploadNext(idx) {
             if (idx >= files.length) {
-                // All done
-                var summaryEl = document.getElementById('mp3-upload-summary');
-                if (summaryEl) {
-                    var msg = done + ' von ' + total + ' erfolgreich';
-                    if (failed > 0) msg += ', ' + failed + ' fehlgeschlagen';
-                    summaryEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#28a745;"></i> ' + msg;
+                // All done — optionally assign to collection
+                var finalize = function () {
+                    var summaryEl = document.getElementById('mp3-upload-summary');
+                    if (summaryEl) {
+                        var msg = done + ' von ' + total + ' erfolgreich';
+                        if (failed > 0) msg += ', ' + failed + ' fehlgeschlagen';
+                        if (assignToCollectionName && uploadedFilenames.length) {
+                            msg += ' – werden Sammlung "' + escAttr(assignToCollectionName) + '" zugeordnet…';
+                        }
+                        summaryEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#28a745;"></i> ' + msg;
+                    }
+                    setTimeout(function () { loadFiles(currentCat, true); }, 1500);
+                };
+
+                if (assignToCollectionName && uploadedFilenames.length) {
+                    var assigns = uploadedFilenames.map(function (fn) {
+                        return setFileCollectionMembership(fn, assignToCollectionName, true);
+                    });
+                    Promise.all(assigns).then(finalize).catch(finalize);
+                } else {
+                    finalize();
                 }
-                // Reload after short delay
-                setTimeout(function () { loadFiles(currentCat, true); }, 1500);
                 return;
             }
 
@@ -2893,9 +2963,13 @@
                 itemEl.classList.add('mp3-upload-active');
             }
 
-            apiUpload(files[idx], currentCat)
-                .then(function () {
+            var uploadFile = files[idx];
+            apiUpload(uploadFile, catId)
+                .then(function (resp) {
                     done++;
+                    // API returns { filename: '...' } — use that (server may rename)
+                    var resultName = (resp && resp.filename) ? resp.filename : uploadFile.name;
+                    uploadedFilenames.push(resultName);
                     if (itemEl) {
                         var st = itemEl.querySelector('.mp3-upload-item-status');
                         st.innerHTML = '<i class="fa-solid fa-circle-check mp3-upload-ok"></i>';
@@ -2905,7 +2979,7 @@
                 })
                 .catch(function (err) {
                     failed++;
-                    console.error('MP3 upload failed:', files[idx].name, err);
+                    console.error('MP3 upload failed:', uploadFile.name, err);
                     if (itemEl) {
                         var st = itemEl.querySelector('.mp3-upload-item-status');
                         st.innerHTML = '<i class="fa-solid fa-circle-xmark mp3-upload-fail"></i>';
