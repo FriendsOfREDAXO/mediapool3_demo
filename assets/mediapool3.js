@@ -930,7 +930,8 @@
     function apiUpload(file, catId) {
         var fd = new FormData();
         fd.append('file', file);
-        fd.append('category_id', catId || 0);
+        // catId -1 means collection mode (no real category) → upload to root (0)
+        fd.append('category_id', (catId && catId > 0) ? catId : 0);
         return fetch(API_BASE + 'media', {
             method: 'POST',
             credentials: 'same-origin',
